@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Corn Coin</title>
+</head>
+<body>
+    <h2>Login to Corn Coin</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label>Name:</label>
+        <input type="text" name="name" required>
+        
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="error-message" style="color: red;"></p>
+
+    <script>
+        // ✅ Auto-redirect to index if session exists
+        fetch("/check-session/")
+        .then(response => response.json())
+        .then(data => {
+            if (data.logged_in) {
+                window.location.href = "/";
+            }
+        });
+
+        // ✅ Handle login request
+        document.querySelector("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            fetch("/login/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("error-message").innerText = data.error;
+                } else {
+                    window.location.href = "/";
+                }
+            })
+            .catch(error => console.error("Login Error:", error));
+        });
+    </script>
+</body>
+</html>
