@@ -3,11 +3,9 @@ from django.http import JsonResponse
 from .models import Account, Order, Market, Transaction
 from django.db.models import Q
 import json
-
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
-
 from django.http import JsonResponse
 
 def check_session(request):
@@ -29,9 +27,9 @@ def login_view(request):
         account = Account.objects.filter(name=username).first()
         if account and check_password(password, account.password):
             request.session["account_id"] = account.id
-            request.session.modified = True  # ✅ Ensure session is saved
+            request.session.modified = True  # Ensure session is saved
             print(f"✅ Login successful! Session ID: {request.session.session_key}")
-            return JsonResponse({"redirect": "/"})  # ✅ Return JSON instead of redirect()
+            return JsonResponse({"redirect": "/"})  # Return JSON instead of redirect()
 
         return JsonResponse({"error": "❌ Invalid credentials"}, status=400)
 
@@ -70,15 +68,14 @@ def order_book(request):
     """
     Fetches all open buy and sell orders and returns them in JSON format.
     """
-    # ✅ Get open buy and sell orders
     buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by("-price", "created_at")
     sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by("price", "created_at")
 
-    # ✅ Get the latest market price
+    # Get the latest market price
     market = Market.objects.first()
     market_price = market.last_price if market else 5.0
 
-    # ✅ Format order data with proper user names
+    # Format order data with proper user names
     buy_orders_data = [
         {"user": order.user.name, "amount": order.amount, "price": order.price}
         for order in buy_orders
@@ -109,12 +106,12 @@ def match_orders():
     for buy_order in buy_orders:
         for sell_order in sell_orders:
             if buy_order.user == sell_order.user:
-                continue  # ✅ Prevent self-trading
+                continue  # Prevent self-trading
 
-            if buy_order.price >= sell_order.price:  # ✅ Match condition
+            if buy_order.price >= sell_order.price:  # Match condition
                 trade_price = sell_order.price
 
-                # ✅ Check how much the buyer can afford
+                # Check how much the buyer can afford
                 max_affordable_amount = buy_order.user.balance_credits / trade_price
                 trade_amount = min(buy_order.amount, sell_order.amount, max_affordable_amount)
 
@@ -123,10 +120,10 @@ def match_orders():
                 seller = sell_order.user
                 total_cost = trade_amount * trade_price
 
-                # ✅ Execute trade
+                # Execute trade
                 try:
                     with transaction.atomic():
-                        # ✅ Transfer Corn Coins & money
+                        # Transfer Corn Coins & money
                         buyer.balance_credits -= total_cost
                         seller.balance_credits += total_cost
 
@@ -136,7 +133,7 @@ def match_orders():
                         buyer.save()
                         seller.save()
 
-                        # ✅ Record transaction
+                        # Record transaction
                         transaction_record = Transaction.objects.create(
                             buyer=buyer,
                             seller=seller,
@@ -144,12 +141,12 @@ def match_orders():
                             price=trade_price
                         )
 
-                        # ✅ Update Market Price
+                        # Update Market Price
                         market.transactions.add(transaction_record)
                         market.last_price = trade_price
                         market.save()
 
-                        # ✅ Update Orders (Handle Partial Matches)
+                        # Update Orders (Handle Partial Matches)
                         buy_order.amount -= trade_amount
                         sell_order.amount -= trade_amount
 
@@ -179,19 +176,19 @@ def place_order(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Read JSON data
-            print("🔍 Received Data:", data)  # ✅ Debugging
+            print("🔍 Received Data:", data)  # Debugging
         except json.JSONDecodeError:
             return JsonResponse({"error": "❌ Invalid JSON format"}, status=400)
 
         # Extract values safely
-        order_type = data.get("order_type")  # ✅ Read order type from frontend
+        order_type = data.get("order_type")  # Read order type from frontend
         amount = data.get("amount")
         price = data.get("price")
 
         if not order_type or not amount or not price:
             return JsonResponse({"error": "❌ Missing required fields"}, status=400)
 
-        if order_type not in ["BUY", "SELL"]:  # ✅ Validate order type
+        if order_type not in ["BUY", "SELL"]:  # Validate order type
             return JsonResponse({"error": "❌ Invalid order type"}, status=400)
 
         try:
@@ -239,13 +236,13 @@ def index(request):
     account_id = request.session.get("account_id")
 
     if not account_id:
-        return redirect("/logout/")  # ✅ Redirect missing users to logout
+        return redirect("/logout/")  # Redirect missing users to logout
 
     try:
         account = Account.objects.get(id=account_id)
     except Account.DoesNotExist:
-        del request.session["account_id"]  # ✅ Remove invalid session
-        return redirect("/logout/")  # ✅ Log out the user
+        del request.session["account_id"]  # Remove invalid session
+        return redirect("/logout/")  # Log out the user
 
 
     account = Account.objects.get(id=request.session["account_id"])
