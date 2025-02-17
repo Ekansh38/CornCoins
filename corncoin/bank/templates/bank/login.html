@@ -1,25 +1,122 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login - Corn Coin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - Corn Coins</title>
+
+    <!-- Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .login-container {
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            width: 350px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .form-control {
+            transition: background-color 0.3s, border 0.3s;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #121212;
+            color: #fff;
+        }
+
+        body.dark-mode .login-container {
+            background-color: #1e1e1e;
+            color: white;
+        }
+
+        body.dark-mode .form-control {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h2>Login to Corn Coin</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <label>Name:</label>
-        <input type="text" name="name" required>
-        
-        <label>Password:</label>
-        <input type="password" name="password" required>
 
-        <button type="submit">Login</button>
-    </form>
+    <!-- Dark Mode Toggle Button -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
 
-    <p id="error-message" style="color: red;"></p>
+    <div class="login-container">
+        <h2 class="text-primary">Login to Corn Coins</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Name:</label>
+                <input type="text" name="name" class="form-control" required placeholder="Enter your username">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password:</label>
+                <input type="password" name="password" class="form-control" required placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <p id="error-message" class="mt-2 text-danger"></p>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ✅ Auto-redirect to index if session exists
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+        }
+
+        // Load saved mode on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedMode = localStorage.getItem("theme") || "light";
+            if (savedMode === "dark") {
+                document.body.classList.add("dark-mode");
+            }
+        });
+
+        // Auto-redirect if session exists
         fetch("/check-session/")
         .then(response => response.json())
         .then(data => {
@@ -28,7 +125,7 @@
             }
         });
 
-        // ✅ Handle login request
+        // Handle login request
         document.querySelector("form").addEventListener("submit", function(event) {
             event.preventDefault();
             let formData = new FormData(this);
@@ -48,5 +145,6 @@
             .catch(error => console.error("Login Error:", error));
         });
     </script>
+
 </body>
 </html>
