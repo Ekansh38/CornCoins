@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine Corn Coins</title>
+
+    <!-- Bootstrap & CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* Dark mode cyberpunk theme */
+        body {
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        /* Mining Container */
+        .mining-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 0 20px #fbc02d;
+        }
+
+        /* Glow effect */
+        .glow {
+            text-shadow: 0 0 10px #ffeb3b, 0 0 20px #ffeb3b, 0 0 30px #ffeb3b;
+        }
+
+        /* Mining Animation */
+        .mining-animation {
+            font-size: 40px;
+            margin-top: 20px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Input & Button Styles */
+        .mine-input {
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 5px;
+            width: 150px;
+            border-radius: 5px;
+        }
+
+        .mine-btn {
+            margin-top: 10px;
+            font-size: 18px;
+            background: #ffeb3b;
+            border: none;
+            color: black;
+            transition: 0.3s;
+        }
+
+        .mine-btn:hover {
+            background: #ffca28;
+            box-shadow: 0 0 10px #ffeb3b;
+        }
+
+        /* Mining Success Message */
+        .success {
+            color: #4caf50;
+            font-size: 18px;
+            margin-top: 15px;
+        }
+
+        /* Mining Failed Message */
+        .error {
+            color: #f44336;
+            font-size: 18px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mining Container -->
+    <div class="mining-container">
+        <h1 class="glow">⛏️ Corn Coin Mining</h1>
+        <p>Find the **3-digit mining code** to earn **Corn Coins**!</p>
+
+        <!-- Mining Reward & Total Coins -->
+        <h3>Reward: <span id="mining-reward">{{ market.mining_reward }}</span> CC</h3>
+        <h3>Total Coins Mined: <span id="total-coins">{{ market.current_supply }}</span> / {{ market.max_supply }} CC</h3>
+
+        <!-- Mining Input -->
+        <input type="text" id="mining-code" class="mine-input" maxlength="3" placeholder="000" pattern="\d{3}" required>
+        <br>
+        <button class="btn mine-btn" onclick="mineCornCoin()">⛏️ Mine Now</button>
+
+        <!-- Mining Response -->
+        <p id="mine-response" class="mt-3"></p>
+    </div>
+
+    <script>
+        function mineCornCoin() {
+            let code = document.getElementById("mining-code").value;
+            let responseBox = document.getElementById("mine-response");
+
+            if (!/^\d{3}$/.test(code)) {
+                responseBox.className = "error";
+                responseBox.innerText = "❌ Code must be 3 digits (e.g., 001, 123)";
+                return;
+            }
+
+            // Show Mining Animation
+            responseBox.className = "mining-animation";
+            responseBox.innerText = "⛏️ Mining...";
+
+            fetch("/mine/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    responseBox.className = "success";
+                    responseBox.innerText = `✅ Success! You mined ${data.reward} CC`;
+
+                    // Update displayed values
+                    document.getElementById("total-coins").innerText = data.new_supply;
+                    document.getElementById("mining-reward").innerText = data.new_reward;
+                } else {
+                    responseBox.className = "error";
+                    responseBox.innerText = `❌ ${data.error}`;
+                }
+            })
+            .catch(error => {
+                responseBox.className = "error";
+                responseBox.innerText = "❌ Mining error!";
+                console.error("Mining Error:", error);
+            });
+        }
+    </script>
+
+</body>
+</html>

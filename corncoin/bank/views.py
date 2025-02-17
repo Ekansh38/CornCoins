@@ -256,3 +256,71 @@ def index(request):
         "transactions": transactions
     })
 
+
+def signup_view(request):
+    if request.method == "POST":
+        username = request.POST.get("name")
+        password = request.POST.get("password")
+
+        if Account.objects.filter(name=username).exists():
+            return JsonResponse({"error": "Username already taken."}, status=400)
+
+        # Create user
+        new_user = Account.objects.create(name=username, password=password)
+        return JsonResponse({"message": "Account created successfully!"})
+
+    return render(request, "bank/signup.html")
+
+@csrf_exempt
+def mine(request):
+    market, created = Market.objects.get_or_create()
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Unauthorized access. Please log in."}, status=401)
+
+
+    if request.method == "POST":
+        if not market.mining_code:  # If no mining code exists, generate a new one
+            market.generate_new_code()
+
+        try:
+            data = json.loads(request.body)  # ✅ Read JSON request
+            entered_code = data.get("code")
+            print(entered_code)
+            print("HSDHHHSJDJSJDJSJDJSJDJSJDJJSJ")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+
+        if not entered_code:
+            return JsonResponse({"error": "No code entered"}, status=400)
+
+        # Get the market instance
+        market = Market.objects.first()
+        if not market or not market.mining_code:
+            return JsonResponse({"error": "Mining system not ready"}, status=400)
+
+        # Check if the entered code matches
+        if market.verify_code(entered_code):
+            # Reward user with coins
+            user = Account.objects.get(id=request.session["account_id"])
+            user.corn_coins += market.mining_reward
+            user.save()
+
+            # Update Market Data (reduce reward over time)
+            market.current_supply += market.mining_reward
+            if market.current_supply >= market.max_supply:
+                return JsonResponse({"error": "Max supply reached! No more mining."}, status=400)
+
+            market.generate_new_code()  # Generate new mining code
+            market.mining_reward *= 0.5 if market.current_supply % 1000 == 0 else 1  # Reduce reward every 1000 coins
+            market.save()
+
+            return JsonResponse({
+                "success": True,
+                "reward": market.mining_reward,
+                "new_supply": market.current_supply,
+                "new_reward": market.mining_reward
+            })
+        else:
+            return JsonResponse({"error": "Incorrect mining code"}, status=400)
+
+    return render(request, "bank/mining.html", {"market": market})

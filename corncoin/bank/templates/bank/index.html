@@ -20,6 +20,8 @@
     </div>
 </nav>
 
+<h1 style="color: black;">MEETING TUESDAY LUNCH AT LIBRARY VERY IMPORTANT PLEASE COME (also this is temporary text)</h1>
+
 <!-- Main Content -->
 <div class="container mt-4">
     <div class="row">
@@ -51,12 +53,12 @@
 
                         <div class="mb-3">
                             <label class="form-label">Amount:</label>
-                            <input type="number" id="amount" name="amount" class="form-control" required>
+                            <input type="number" id="amount" name="amount" step="any" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Price:</label>
-                            <input type="number" id="price" name="price" class="form-control" required>
+                            <input type="number" id="price" name="price" step="any" class="form-control" required>
                         </div>
 
                         <button type="submit" class="btn btn-success w-100">Submit Order</button>
@@ -192,9 +194,9 @@ document.getElementById("trade-form").addEventListener("submit", function(event)
     let price = parseFloat(document.getElementById("price").value);
     let responseBox = document.getElementById("order-response");
 
-    if (!amount || amount < 1) {
+	if (!amount || amount == 0) {
         responseBox.className = "alert alert-danger mt-3";
-        responseBox.innerText = "❌ Order amount must be at least 1 CC.";
+        responseBox.innerText = "❌ Order amount must greater than 0.0CC.";
         responseBox.classList.remove("d-none");
         setTimeout(() => responseBox.classList.add("d-none"), 3000);
         return;
