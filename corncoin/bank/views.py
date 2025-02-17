@@ -93,96 +93,82 @@ def order_book(request):
         "buy_orders": buy_orders_data,
         "sell_orders": sell_orders_data,
     })
+from django.db import transaction
+
+from django.db import transaction
+
 def match_orders():
     """
-    Matches buy and sell orders, executes trades, updates balances, and stores transactions in Market.
+    Matches buy and sell orders, executes trades, updates balances, and records transactions.
     """
     buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by("-price", "created_at")
     sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by("price", "created_at")
 
-    # Get or create the Market instance
-    market, created = Market.objects.get_or_create()
+    market, _ = Market.objects.get_or_create()
 
     for buy_order in buy_orders:
         for sell_order in sell_orders:
-            if buy_order.user == sell_order.user:  #Prevent self-trading
-                continue
+            if buy_order.user == sell_order.user:
+                continue  # ✅ Prevent self-trading
 
-            if buy_order.price >= sell_order.price:  # ✅ Price match found
-                trade_amount = min(buy_order.amount, sell_order.amount)
-                trade_price = sell_order.price  # ✅ Execute trade at sell price
+            if buy_order.price >= sell_order.price:  # ✅ Match condition
+                trade_price = sell_order.price
+
+                # ✅ Check how much the buyer can afford
+                max_affordable_amount = buy_order.user.balance_credits / trade_price
+                trade_amount = min(buy_order.amount, sell_order.amount, max_affordable_amount)
+
 
                 buyer = buy_order.user
                 seller = sell_order.user
-
-                # ✅ Check if the buyer can afford the full trade
                 total_cost = trade_amount * trade_price
-                if buyer.balance_credits < total_cost:
-                    # ✅ Reduce trade amount to what the buyer can afford
-                    max_affordable_amount = buyer.balance_credits / trade_price
-                    if max_affordable_amount < 1:
-                        continue  # Skip if the buyer can't afford at least 1 CC
 
-                    trade_amount = max_affordable_amount
-                    total_cost = trade_amount * trade_price
+                # ✅ Execute trade
+                try:
+                    with transaction.atomic():
+                        # ✅ Transfer Corn Coins & money
+                        buyer.balance_credits -= total_cost
+                        seller.balance_credits += total_cost
 
-                # ✅ Execute trade: Transfer Corn Coins and money 🤣
-                buyer.balance_credits -= total_cost
-                seller.balance_credits += total_cost
-                buyer.corn_coins += trade_amount
-                seller.corn_coins -= trade_amount
+                        buyer.corn_coins += trade_amount
+                        seller.corn_coins -= trade_amount
 
-                # ✅ Save updated balances
-                buyer.save()
-                seller.save()
+                        buyer.save()
+                        seller.save()
 
-                # ✅ Create a transaction record
-                transaction = Transaction.objects.create(
-                    buyer=buyer,
-                    seller=seller,
-                    amount=trade_amount,
-                    price=trade_price
-                )
+                        # ✅ Record transaction
+                        transaction_record = Transaction.objects.create(
+                            buyer=buyer,
+                            seller=seller,
+                            amount=trade_amount,
+                            price=trade_price
+                        )
 
-                # Add transaction to Market
-                market.transactions.add(transaction)
-                market.last_price = trade_price  # ✅ Update market price
-                market.save()
+                        # ✅ Update Market Price
+                        market.transactions.add(transaction_record)
+                        market.last_price = trade_price
+                        market.save()
 
-                # Adjust orders for partial matching
-                buy_order.amount -= trade_amount
-                sell_order.amount -= trade_amount
+                        # ✅ Update Orders (Handle Partial Matches)
+                        buy_order.amount -= trade_amount
+                        sell_order.amount -= trade_amount
 
-                if buy_order.amount == 0:
-                    buy_order.status = "MATCHED"
-                    buy_order.delete()
-                else:
-                    buy_order.save()
+                        if buy_order.amount < 1:
+                            buy_order.status = "MATCHED"
+                            buy_order.delete()
+                        else:
+                            buy_order.save()
 
-                if sell_order.amount == 0:
-                    sell_order.status = "MATCHED"
-                    sell_order.delete()
-                else:
-                    sell_order.save()
+                        if sell_order.amount < 1:
+                            sell_order.status = "MATCHED"
+                            sell_order.delete()
+                        else:
+                            sell_order.save()
 
-                # Log the transaction
-                print(f"✅ Matched Order: {buyer.name} bought {trade_amount} CC from {seller.name} at ${trade_price}")
+                        print(f"✅ Matched Order: {buyer.name} bought {trade_amount} CC from {seller.name} at ${trade_price}")
 
-
-
-    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by("-price")
-    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by("price")
-
-    buy_orders_data = [{"user": order.user.name, "amount": order.amount, "price": order.price} for order in buy_orders]
-    sell_orders_data = [{"user": order.user.name, "amount": order.amount, "price": order.price} for order in sell_orders]
-
-    print(buy_orders)
-
-    return JsonResponse({
-        "buy_orders": buy_orders_data,
-        "sell_orders": sell_orders_data,
-        "market_price": get_market_price(),
-    })
+                except Exception as e:
+                    print(f"❌ ERROR: Failed to process trade - {e}")
 
 
 @csrf_exempt  # Remove this in production (use CSRF tokens)
@@ -249,8 +235,18 @@ def index(request):
     Shows the index page, but only if the user is logged in.
     Otherwise, redirects to login.
     """
-    if "account_id" not in request.session:  # ✅ Redirect if not logged in
-        return redirect("login")
+
+    account_id = request.session.get("account_id")
+
+    if not account_id:
+        return redirect("/logout/")  # ✅ Redirect missing users to logout
+
+    try:
+        account = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]  # ✅ Remove invalid session
+        return redirect("/logout/")  # ✅ Log out the user
+
 
     account = Account.objects.get(id=request.session["account_id"])
     market = Market.objects.first()  # Get the latest market price

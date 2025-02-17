@@ -1,0 +1,119 @@
+/* === DARK MODE STYLES === */
+:root {
+    --background-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #ffffff;
+    --accent-color: #4caf50;
+    --border-color: #333;
+    --hover-color: #66bb6a;
+}
+
+/* Light Mode Variables */
+.light-mode {
+    --background-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --accent-color: #007bff;
+    --border-color: #ddd;
+    --hover-color: #0056b3;
+}
+
+body {
+    font-family: "Arial", sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* === NAVIGATION BAR === */
+nav {
+    background-color: var(--accent-color);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* === MAIN CONTAINER === */
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+/* === ORDER FORM === */
+.order-form {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    width: 40%;
+    text-align: left;
+}
+.order-form h3 {
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+.order-form label {
+    font-weight: bold;
+}
+.order-form input, .order-form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-color);
+}
+.order-form button {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+.order-form button:hover {
+    background-color: var(--hover-color);
+}
+
+/* === ORDER BOOK === */
+.order-book {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+}
+.order-book h3 {
+    color: var(--accent-color);
+}
+.order-book ul {
+    list-style: none;
+    padding: 0;
+}
+.order-book li {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* === DARK MODE TOGGLE === */
+#dark-mode-toggle {
+    cursor: pointer;
+    padding: 10px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+}

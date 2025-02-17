@@ -1,172 +1,252 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Corn Coin Exchange</title>
+
+    <!-- ✅ Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- ✅ Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
-<body>
-    <h1>📈 Corn Coin Market</h1>
-    
-    <!-- ✅ Display the Logged-in User -->
-    <h2>Welcome, <span id="user-name">Loading...</span>! 👋</h2>
-    
-    <h3>Balance: $<span id="balance">Loading...</span></h3>
-    <h3>Corn Coins: <span id="corn-coins">Loading...</span></h3>
+<body class="bg-light">
 
-    <a href="/logout/">Logout</a>
+<!-- ✅ Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">🌽 Corn Coin Exchange</a>
+        <button class="btn btn-outline-light" id="toggle-dark-mode">🌙 Dark Mode</button>
+    </div>
+</nav>
 
-    <!-- ✅ Display the Market Price -->
-    <h3>Market Price: $<span id="market-price">Loading...</span></h3>
-    
-    <h3>Place Order</h3>
-    <form id="trade-form">
-        <label>Order Type:</label>
-        <select id="order-type" name="order_type">
-            <option value="BUY">BUY</option>
-            <option value="SELL">SELL</option>
-        </select>
+<!-- ✅ Main Content -->
+<div class="container mt-4">
+    <div class="row">
+	    <div class="container mt-4">
+    <div class="row">
+        <!-- ✅ User Info -->
+        <div class="col-12 mb-3">
+            <div class="alert alert-info text-center">
+                <h4>Welcome, <span id="user-name">Loading...</span>! 👋</h4>
+                <p><strong>Balance:</strong> $<span id="balance">Loading...</span></p>
+                <p><strong>Corn Coins:</strong> <span id="corn-coins">Loading...</span> CC</p>
+                <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </div>
+        <!-- Left Column: Order Form -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-primary">Place Order</h4>
+                    <form id="trade-form">
+                        <div class="mb-3">
+                            <label class="form-label">Order Type:</label>
+                            <select id="order-type" name="order_type" class="form-select">
+                                <option value="BUY">BUY</option>
+                                <option value="SELL">SELL</option>
+                            </select>
+                        </div>
 
-        <label>Amount:</label>
-        <input type="number" id="amount" name="amount" required>
-        
-        <label>Price:</label>
-        <input type="number" id="price" name="price" required>
+                        <div class="mb-3">
+                            <label class="form-label">Amount:</label>
+                            <input type="number" id="amount" name="amount" class="form-control" required>
+                        </div>
 
-        <button type="submit">Submit</button>
-    </form>
+                        <div class="mb-3">
+                            <label class="form-label">Price:</label>
+                            <input type="number" id="price" name="price" class="form-control" required>
+                        </div>
 
-    <h3>Transaction Response:</h3>
-    <p id="response"></p>
+                        <button type="submit" class="btn btn-success w-100">Submit Order</button>
+                    </form>
+                </div>
+            </div>
+	    <div id="order-response" class="alert d-none mt-3"></div>
+        </div>
 
-    <h3>Order Book</h3>
-    <h4>Buy Orders</h4>
-    <ul id="buy-orders"></ul>
+        <!-- Right Column: Order Book -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-primary">Market Price: $<span id="market-price">Loading...</span></h4>
+                    
+                    <h5 class="text-success">Buy Orders</h5>
+                    <ul class="list-group mb-3" id="buy-orders"></ul>
 
-    <h4>Sell Orders</h4>
-    <ul id="sell-orders"></ul>
+                    <h5 class="text-danger">Sell Orders</h5>
+                    <ul class="list-group" id="sell-orders"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <h3>Transaction History</h3>
-    <table border="1">
-        <tr>
-            <th>Buyer</th>
-            <th>Seller</th>
-            <th>Amount</th>
-            <th>Price</th>
-            <th>Timestamp</th>
-        </tr>
-        {% for trade in transactions %}
-        <tr>
-            <td>{{ trade.buyer.name }}</td>
-            <td>{{ trade.seller.name }}</td>
-            <td>{{ trade.amount }} CC</td>
-            <td>${{ trade.price }}</td>
-            <td>{{ trade.timestamp }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">No trades yet.</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <!-- ✅ Transaction History -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h4 class="card-title text-primary">Transaction History</h4>
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Buyer</th>
+                        <th>Seller</th>
+                        <th>Amount</th>
+                        <th>Price</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-history">
+                    {% for trade in transactions %}
+                    <tr>
+                        <td>{{ trade.buyer.name }}</td>
+                        <td>{{ trade.seller.name }}</td>
+                        <td>{{ trade.amount }} CC</td>
+                        <td>${{ trade.price }}</td>
+                        <td>{{ trade.timestamp }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No trades yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
+<!-- ✅ Bootstrap & Custom JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // ✅ Load user data
-        function loadUserData() {
-            fetch("/get-user/")
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    window.location.href = "/login/";
-                } else {
-                    document.getElementById("user-name").innerText = data.name;
-                    document.getElementById("balance").innerText = data.balance_credits;
-                    document.getElementById("corn-coins").innerText = data.corn_coins;
-                }
-            })
-            .catch(error => console.error("Error loading user data:", error));
-        }
+<script>
+    // ✅ Load user data
+    function loadUserData() {
+        fetch("/get-user/")
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                window.location.href = "/login/";
+            } else {
+                document.getElementById("user-name").innerText = data.name;
+                document.getElementById("balance").innerText = data.balance_credits;
+                document.getElementById("corn-coins").innerText = data.corn_coins;
+            }
+        })
+        .catch(error => console.error("Error loading user data:", error));
+    }
 
-        // ✅ Load order book instantly & update every 5 seconds
-        function loadOrderBook() {
-            fetch("/orders/")
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("market-price").innerText = data.market_price;
+    // ✅ Load order book
+    function loadOrderBook() {
+        fetch("/orders/")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("market-price").innerText = data.market_price;
 
-                let buyOrdersList = document.getElementById("buy-orders");
-                let sellOrdersList = document.getElementById("sell-orders");
+            let buyOrdersList = document.getElementById("buy-orders");
+            let sellOrdersList = document.getElementById("sell-orders");
 
-                if (!buyOrdersList || !sellOrdersList) {
-                    console.error("Buy or sell orders list elements not found.");
-                    return;
-                }
-
-                // ✅ Clear existing orders before updating
-                buyOrdersList.innerHTML = "";
-                sellOrdersList.innerHTML = "";
-
-                // ✅ Populate Buy Orders
-                data.buy_orders.forEach(order => {
-                    let listItem = document.createElement("li");
-                    listItem.innerText = `BUY ${order.amount} CC @ $${order.price} (by ${order.user})`;
-                    buyOrdersList.appendChild(listItem);
-                });
-
-                // ✅ Populate Sell Orders
-                data.sell_orders.forEach(order => {
-                    let listItem = document.createElement("li");
-                    listItem.innerText = `SELL ${order.amount} CC @ $${order.price} (by ${order.user})`;
-                    sellOrdersList.appendChild(listItem);
-                });
-
-            })
-            .catch(error => console.error("Error loading order book:", error));
-        }
-
-        // ✅ Handle form submission
-        document.getElementById("trade-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            let orderType = document.getElementById("order-type").value;
-            let amount = document.getElementById("amount").value;
-            let price = document.getElementById("price").value;
-
-            if (!amount || !price) {
-                document.getElementById("response").innerText = "❌ Please enter both amount and price!";
+            if (!buyOrdersList || !sellOrdersList) {
+                console.error("Buy or sell orders list elements not found.");
                 return;
             }
 
-            let formData = {
-                order_type: orderType,
-                amount: amount,
-                price: price
-            };
+            buyOrdersList.innerHTML = "";
+            sellOrdersList.innerHTML = "";
 
-            console.log("🔍 Sending Order Data:", formData);  // ✅ Debugging
+            data.buy_orders.forEach(order => {
+                let listItem = document.createElement("li");
+                listItem.className = "list-group-item list-group-item-success";
+                listItem.textContent = `${order.user} wants to BUY ${order.amount} CC @ $${order.price}`;
+                buyOrdersList.appendChild(listItem);
+            });
 
-            fetch("/trade/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("response").innerText = data.message || data.error;
-                loadUserData();  // ✅ Refresh user balance after order
-                loadOrderBook(); // ✅ Refresh order book after placing order
-            })
-            .catch(error => console.error("Fetch Error:", error));
-        });
+            data.sell_orders.forEach(order => {
+                let listItem = document.createElement("li");
+                listItem.className = "list-group-item list-group-item-danger";
+                listItem.textContent = `${order.user} wants to SELL ${order.amount} CC @ $${order.price}`;
+                sellOrdersList.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error("Error loading order book:", error));
+    }
 
-        // ✅ Load user, order book & price immediately & auto-refresh every 5s
-        document.addEventListener("DOMContentLoaded", () => {
-            loadUserData();
-            loadOrderBook();
-            setInterval(loadOrderBook, 5000);
-        });
-    </script>
+    // ✅ Dark Mode Toggle
+    document.getElementById("toggle-dark-mode").addEventListener("click", function() {
+        document.body.classList.toggle("bg-dark");
+        document.body.classList.toggle("text-light");
+    });
+
+    // ✅ Auto-refresh data every 5 seconds
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUserData();
+        loadOrderBook();
+        setInterval(loadOrderBook, 5000);
+    });
+// ✅ Handle order submission
+document.getElementById("trade-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    let orderType = document.getElementById("order-type").value;
+    let amount = parseFloat(document.getElementById("amount").value);
+    let price = parseFloat(document.getElementById("price").value);
+    let responseBox = document.getElementById("order-response");
+
+    if (!amount || amount < 1) {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ Order amount must be at least 1 CC.";
+        responseBox.classList.remove("d-none");
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+        return;
+    }
+
+    if (!price) return;
+
+    let formData = { 
+        order_type: orderType, // ✅ Ensures the correct order type is sent
+        amount: amount, 
+        price: price 
+    };
+
+    console.log("🔍 Sending Order Data:", formData);  // ✅ Debugging
+
+    // ✅ Show "Processing Order..." immediately
+    responseBox.className = "alert alert-warning mt-3";
+    responseBox.innerText = "⏳ Processing Order...";
+    responseBox.classList.remove("d-none");
+
+    fetch("/trade/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🔍 Server Response:", data);  // ✅ Debugging
+
+        if (data.error) {
+            responseBox.className = "alert alert-danger mt-3";
+            responseBox.innerText = `❌ ${data.error}`;
+        } else {
+            responseBox.className = "alert alert-success mt-3";
+            responseBox.innerText = `✅ ${data.message}`;
+        }
+
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+
+        loadUserData();
+        loadOrderBook();
+    })
+    .catch(error => {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ An unexpected error occurred. Check the console for details.";
+        console.error("🚨 Fetch Error:", error);
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+    });
+});
+</script>
 
 </body>
 </html>
