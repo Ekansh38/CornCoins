@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Corn Coin Exchange</title>
 
-    <!-- Bootstrap and CSS -->
+    <!-- Bootstrap & CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
@@ -15,18 +15,15 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand" href="">🌽 Corn Coin Exchange</a>
-        <a class="navbar-brand" href="mine/">⛏️ Mine</a>
-        <a class="navbar-brand" href="graph/">📈 Graph</a>
+        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
+        <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
+        <a class="navbar-brand" href="/graph/">📈 Graph</a>
         <button class="btn btn-outline-light" id="toggle-dark-mode">🌙 Dark Mode</button>
     </div>
 </nav>
 
-
 <!-- Main Content -->
 <div class="container mt-4">
-    <div class="row">
-	    <div class="container mt-4">
     <div class="row">
         <!-- ✅ User Info -->
         <div class="col-12 mb-3">
@@ -37,7 +34,7 @@
                 <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
             </div>
         </div>
-    </div>
+
         <!-- Left Column: Order Form -->
         <div class="col-md-4">
             <div class="card shadow-sm">
@@ -57,16 +54,24 @@
                             <input type="number" id="amount" name="amount" step="any" class="form-control" required>
                         </div>
 
+                        <!-- ✅ Toggle for Optimal Price -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="use-optimal-price" class="form-check-input">
+                            <label class="form-check-label" for="use-optimal-price">Use Optimal Price</label>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Price per Coin:</label>
                             <input type="number" id="price" name="price" step="any" class="form-control" required>
                         </div>
 
+                        <p><strong>Total Cost:</strong> $<span id="total-cost">0.00</span></p>
+
                         <button type="submit" class="btn btn-success w-100">Submit Order</button>
                     </form>
                 </div>
             </div>
-	    <div id="order-response" class="alert d-none mt-3"></div>
+            <div id="order-response" class="alert d-none mt-3"></div>
         </div>
 
         <!-- Right Column: Order Book -->
@@ -84,8 +89,9 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Transaction History -->
+            <!-- ✅ Transaction History (Restored) -->
     <div class="card shadow-sm mt-4">
         <div class="card-body">
             <h4 class="card-title text-primary">Transaction History</h4>
@@ -106,7 +112,7 @@
                         <td>{{ trade.seller.name }}</td>
                         <td>{{ trade.amount }} CC</td>
                         <td>${{ trade.price }}</td>
-                        <td>{{ trade.timestamp }}</td>
+                        <td>{{ trade.timestamp|date:"Y-m-d H:i" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -117,13 +123,30 @@
             </table>
         </div>
     </div>
-</div>
 
-<!-- Bootstrap JS  -->
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Load data
+    let lowestSellOrders = [];
+    let highestBuyOrders = [];
+
+
+        function updatePrice() {
+        let orderType = document.getElementById("order-type").value;
+        let priceField = document.getElementById("price");
+        let useOptimal = document.getElementById("use-optimal-price").checked;
+
+        if (useOptimal) {
+            if (orderType === "BUY" && lowestSellPrice !== null) {
+                priceField.value = lowestSellPrice;
+            } else if (orderType === "SELL" && highestBuyPrice !== null) {
+                priceField.value = highestBuyPrice;
+            }
+        }
+    }
+
     function loadUserData() {
         fetch("/get-user/")
         .then(response => response.json())
@@ -132,122 +155,174 @@
                 window.location.href = "/login/";
             } else {
                 document.getElementById("user-name").innerText = data.name;
-                document.getElementById("balance").innerText = data.balance_credits;
-                document.getElementById("corn-coins").innerText = data.corn_coins;
+                document.getElementById("balance").innerText = data.balance_credits.toFixed(2);
+                document.getElementById("corn-coins").innerText = data.corn_coins.toFixed(2);
             }
         })
         .catch(error => console.error("Error loading user data:", error));
     }
 
-    // Load order book
-    function loadOrderBook() {
-        fetch("/orders/")
+function loadOrderBook() {
+    fetch("/orders/")
         .then(response => response.json())
         .then(data => {
+            console.log("📜 Loaded Order Book:", data);
+
+            // ✅ Update Market Price
             document.getElementById("market-price").innerText = data.market_price;
 
             let buyOrdersList = document.getElementById("buy-orders");
             let sellOrdersList = document.getElementById("sell-orders");
 
             if (!buyOrdersList || !sellOrdersList) {
-                console.error("Buy or sell orders list elements not found.");
+                console.error("❌ Order book elements not found.");
                 return;
             }
 
+            // ✅ Clear existing orders
             buyOrdersList.innerHTML = "";
             sellOrdersList.innerHTML = "";
 
-            data.buy_orders.forEach(order => {
+            // ✅ Store sorted orders for pricing calculations
+            lowestSellOrders = [...data.sell_orders]
+                .filter(order => order.amount > 0) // Ignore invalid orders
+                .sort((a, b) => a.price - b.price); // Lowest first
+
+            highestBuyOrders = [...data.buy_orders]
+                .filter(order => order.amount > 0) // Ignore invalid orders
+                .sort((a, b) => b.price - a.price); // Highest first
+
+            // ✅ Display Buy Orders (Highest Price First)
+            highestBuyOrders.forEach(order => {
                 let listItem = document.createElement("li");
                 listItem.className = "list-group-item list-group-item-success";
-                listItem.textContent = `${order.user} wants to BUY ${order.amount} CC @ $${order.price}`;
+                listItem.innerHTML = `<strong>${order.user}</strong> wants to <strong>BUY</strong> ${order.amount} CC @ <strong>$${order.price.toFixed(2)}</strong>`;
                 buyOrdersList.appendChild(listItem);
             });
 
-            data.sell_orders.forEach(order => {
+            // ✅ Display Sell Orders (Lowest Price First)
+            lowestSellOrders.forEach(order => {
                 let listItem = document.createElement("li");
                 listItem.className = "list-group-item list-group-item-danger";
-                listItem.textContent = `${order.user} wants to SELL ${order.amount} CC @ $${order.price}`;
+                listItem.innerHTML = `<strong>${order.user}</strong> wants to <strong>SELL</strong> ${order.amount} CC @ <strong>$${order.price.toFixed(2)}</strong>`;
                 sellOrdersList.appendChild(listItem);
             });
+
+            console.log("✅ Buy Orders:", highestBuyOrders);
+            console.log("✅ Sell Orders:", lowestSellOrders);
         })
-        .catch(error => console.error("Error loading order book:", error));
+        .catch(error => console.error("🚨 Error loading order book:", error));
+}
+function calculateOptimalPrice() {
+    console.log("🔍 Calculating optimal price...");
+
+    let orderType = document.getElementById("order-type").value;
+    let amount = parseFloat(document.getElementById("amount").value) || 0;
+    let priceField = document.getElementById("price");
+    let totalCost = 0;
+    let remainingAmount = amount;
+
+    if (!amount || amount <= 0) return;
+
+    if (orderType === "BUY" && lowestSellOrders.length > 0) {
+        for (let order of lowestSellOrders) {
+            let tradeAmount = Math.min(order.amount, remainingAmount);
+            totalCost += tradeAmount * order.price;
+            remainingAmount -= tradeAmount;
+
+            console.log(`✅ Matching ${tradeAmount} CC at $${order.price}, Remaining: ${remainingAmount}`);
+
+            if (remainingAmount <= 0) break; // ✅ Ensures exact match breaks loop
+        }    } else if (orderType === "SELL" && highestBuyOrders.length > 0) {
+        for (let order of highestBuyOrders) {
+            let tradeAmount = Math.min(order.amount, remainingAmount);
+            totalCost += tradeAmount * order.price;
+            remainingAmount -= tradeAmount;
+            if (remainingAmount <= 0) break;
+        }
     }
 
-    // Dark Mode Toggle
-    document.getElementById("toggle-dark-mode").addEventListener("click", function() {
-        document.body.classList.toggle("bg-dark");
-        document.body.classList.toggle("text-light");
-    });
+    // ✅ Set price field correctly
+    if (remainingAmount > 0) {
+        priceField.value = ""; // If there's not enough liquidity, leave empty
+        document.getElementById("total-cost").innerText = "Not enough liquidity!";
+    } else {
+        priceField.value = (totalCost / amount).toFixed(2);
+        document.getElementById("total-cost").innerText = totalCost.toFixed(2);
+    }
 
-    // Auto-refresh data every 5 seconds
+    console.log("✅ Optimal price:", totalCost / amount, "Total cost:", totalCost);
+}
+function updateTotalCost() {
+    let amount = parseFloat(document.getElementById("amount").value) || 0;
+    let price = parseFloat(document.getElementById("price").value) || 0;
+
+    if (amount > 0 && price > 0) {
+        document.getElementById("total-cost").innerText = (amount * price).toFixed(2);
+    } else {
+        document.getElementById("total-cost").innerText = "0.00";
+    }
+}
+
+// 🔹 Auto-update total cost when user types in amount or price
+document.getElementById("amount").addEventListener("input", updateTotalCost);
+document.getElementById("price").addEventListener("input", updateTotalCost);
+    function handleOrderSubmission(event) {
+        event.preventDefault();
+
+        let orderType = document.getElementById("order-type").value;
+        let amount = parseFloat(document.getElementById("amount").value);
+        let price = parseFloat(document.getElementById("price").value);
+        let responseBox = document.getElementById("order-response");
+
+        if (!amount || amount <= 0) {
+            responseBox.className = "alert alert-danger mt-3";
+            responseBox.innerText = "❌ Order amount must be greater than 0.";
+            responseBox.classList.remove("d-none");
+            return;
+        }
+
+        let formData = { order_type: orderType, amount: amount, price: price };
+
+        fetch("/trade/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            responseBox.className = data.error ? "alert alert-danger mt-3" : "alert alert-success mt-3";
+            responseBox.innerText = data.error || `✅ ${data.message}`;
+            loadUserData();
+            loadOrderBook();
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         loadUserData();
         loadOrderBook();
         setInterval(loadOrderBook, 5000);
+
+        document.getElementById("use-optimal-price").addEventListener("change", function() {
+            if (this.checked) {
+                calculateOptimalPrice();
+            }
+        });
+
+        document.getElementById("amount").addEventListener("input", function() {
+            if (document.getElementById("use-optimal-price").checked) {
+                calculateOptimalPrice();
+            }
+        });
+
+        document.getElementById("order-type").addEventListener("change", function() {
+            if (document.getElementById("use-optimal-price").checked) {
+                calculateOptimalPrice();
+            }
+        });
     });
-// Handle order submission
-document.getElementById("trade-form").addEventListener("submit", function(event) {
-    event.preventDefault();
 
-    let orderType = document.getElementById("order-type").value;
-    let amount = parseFloat(document.getElementById("amount").value);
-    let price = parseFloat(document.getElementById("price").value);
-    let responseBox = document.getElementById("order-response");
-
-	if (!amount || amount == 0) {
-        responseBox.className = "alert alert-danger mt-3";
-        responseBox.innerText = "❌ Order amount must greater than 0.0CC.";
-        responseBox.classList.remove("d-none");
-        setTimeout(() => responseBox.classList.add("d-none"), 3000);
-        return;
-    }
-
-    if (!price) return;
-
-    let formData = { 
-        order_type: orderType, // Ensures the correct order type is sent
-        amount: amount, 
-        price: price 
-    };
-
-    console.log("🔍 Sending Order Data:", formData);  // Debugging
-
-    // Show "Processing Order..." immediately
-    responseBox.className = "alert alert-warning mt-3";
-    responseBox.innerText = "⏳ Processing Order...";
-    responseBox.classList.remove("d-none");
-
-    fetch("/trade/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("🔍 Server Response:", data);  // Debugging
-
-        if (data.error) {
-            responseBox.className = "alert alert-danger mt-3";
-            responseBox.innerText = `❌ ${data.error}`;
-        } else {
-            responseBox.className = "alert alert-success mt-3";
-            responseBox.innerText = `✅ ${data.message}`;
-        }
-
-        setTimeout(() => responseBox.classList.add("d-none"), 3000);
-
-        loadUserData();
-        loadOrderBook();
-    })
-    .catch(error => {
-        responseBox.className = "alert alert-danger mt-3";
-        responseBox.innerText = "❌ An unexpected error occurred. Check the console for details.";
-        console.error("🚨 Fetch Error:", error);
-        setTimeout(() => responseBox.classList.add("d-none"), 3000);
-    });
-});
-</script>
+    </script>
 
 </body>
-/html>
+</html>
