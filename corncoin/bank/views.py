@@ -8,6 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
 
+
 def check_session(request):
     """
     Returns whether the user is logged in.
@@ -36,15 +37,12 @@ def login_view(request):
     return render(request, "bank/login.html")
 
 
-
-
 def logout_view(request):
     """
     Logs the user out and redirects to login page.
     """
     request.session.flush()
     return redirect("login")
-
 
 
 def update_market_price(new_price):
@@ -56,20 +54,27 @@ def update_market_price(new_price):
     market.save()
     print(f"📈 Market Price Updated: ${new_price:.2f}")
 
+
 def get_market_price():
     market = Market.objects.first()
     if not market:
         market = Market.objects.create(last_price=120.0)
     return market.last_price
 
+
 from .models import Order, Account, Transaction, Market
+
 
 def order_book(request):
     """
     Fetches all open buy and sell orders and returns them in JSON format.
     """
-    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by("-price", "created_at")
-    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by("price", "created_at")
+    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by(
+        "-price", "created_at"
+    )
+    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by(
+        "price", "created_at"
+    )
 
     # Get the latest market price
     market = Market.objects.first()
@@ -85,21 +90,30 @@ def order_book(request):
         for order in sell_orders
     ]
 
-    return JsonResponse({
-        "market_price": market_price,
-        "buy_orders": buy_orders_data,
-        "sell_orders": sell_orders_data,
-    })
+    return JsonResponse(
+        {
+            "market_price": market_price,
+            "buy_orders": buy_orders_data,
+            "sell_orders": sell_orders_data,
+        }
+    )
+
+
 from django.db import transaction
 
 from django.db import transaction
+
 
 def match_orders():
     """
     Matches buy and sell orders, executes trades, updates balances, and records transactions.
     """
-    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by("-price", "created_at")
-    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by("price", "created_at")
+    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by(
+        "-price", "created_at"
+    )
+    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by(
+        "price", "created_at"
+    )
 
     market, _ = Market.objects.get_or_create()
 
@@ -113,8 +127,9 @@ def match_orders():
 
                 # Check how much the buyer can afford
                 max_affordable_amount = buy_order.user.balance_credits / trade_price
-                trade_amount = min(buy_order.amount, sell_order.amount, max_affordable_amount)
-
+                trade_amount = min(
+                    buy_order.amount, sell_order.amount, max_affordable_amount
+                )
 
                 buyer = buy_order.user
                 seller = sell_order.user
@@ -138,7 +153,7 @@ def match_orders():
                             buyer=buyer,
                             seller=seller,
                             amount=trade_amount,
-                            price=trade_price
+                            price=trade_price,
                         )
 
                         # Update Market Price
@@ -162,7 +177,9 @@ def match_orders():
                         else:
                             sell_order.save()
 
-                        print(f"✅ Matched Order: {buyer.name} bought {trade_amount} CC from {seller.name} at ${trade_price}")
+                        print(
+                            f"✅ Matched Order: {buyer.name} bought {trade_amount} CC from {seller.name} at ${trade_price}"
+                        )
 
                 except Exception as e:
                     print(f"❌ ERROR: Failed to process trade - {e}")
@@ -185,6 +202,31 @@ def place_order(request):
         amount = data.get("amount")
         price = data.get("price")
 
+        # Check if not negative and can afford
+
+        user_credits = Account.objects.get(
+            id=request.session["account_id"]
+        ).balance_credits
+        user_corn_coins = Account.objects.get(
+            id=request.session["account_id"]
+        ).corn_coins
+
+        if order_type == "BUY":
+            total_price = amount * price
+            if user_credits < total_price:
+                return JsonResponse(
+                    {"error": "❌ Insufficient funds to place buy order"}, status=400
+                )
+        elif order_type == "SELL":
+            if user_corn_coins < amount:
+                return JsonResponse(
+                    {"error": "❌ Insufficient corn coins to place sell order"},
+                    status=400,
+                )
+
+        if amount < 0 or price < 0:
+            return JsonResponse({"error": "❌ Negative values not allowed"}, status=400)
+
         if not order_type or not amount or not price:
             return JsonResponse({"error": "❌ Missing required fields"}, status=400)
 
@@ -195,7 +237,9 @@ def place_order(request):
             amount = float(amount)
             price = float(price)
         except ValueError:
-            return JsonResponse({"error": "❌ Amount and price must be valid numbers"}, status=400)
+            return JsonResponse(
+                {"error": "❌ Amount and price must be valid numbers"}, status=400
+            )
 
         if "account_id" not in request.session:
             return JsonResponse({"error": "❌ User not logged in"}, status=400)
@@ -205,10 +249,14 @@ def place_order(request):
             return JsonResponse({"error": "❌ User not found"}, status=400)
 
         # Save order with the correct order type
-        order = Order.objects.create(user=user, order_type=order_type, amount=amount, price=price)
+        order = Order.objects.create(
+            user=user, order_type=order_type, amount=amount, price=price
+        )
         match_orders()
 
-        return JsonResponse({"message": f"✅ Order placed: {order_type} {amount} CC @ ${price:.2f}"})
+        return JsonResponse(
+            {"message": f"✅ Order placed: {order_type} {amount} CC @ ${price:.2f}"}
+        )
 
     return JsonResponse({"error": "❌ Invalid request method"}, status=400)
 
@@ -221,11 +269,14 @@ def get_user_data(request):
         return JsonResponse({"error": "Not logged in"}, status=400)
 
     account = Account.objects.get(id=request.session["account_id"])
-    return JsonResponse({
-        "name": account.name,
-        "balance_credits": account.balance_credits,
-        "corn_coins": account.corn_coins
-    })
+    return JsonResponse(
+        {
+            "name": account.name,
+            "balance_credits": account.balance_credits,
+            "corn_coins": account.corn_coins,
+        }
+    )
+
 
 def index(request):
     """
@@ -244,17 +295,20 @@ def index(request):
         del request.session["account_id"]  # Remove invalid session
         return redirect("/logout/")  # Log out the user
 
-
     account = Account.objects.get(id=request.session["account_id"])
     market = Market.objects.first()  # Get the latest market price
 
     transactions = market.transactions.order_by("-timestamp")[:20] if market else []
 
-    return render(request, "bank/index.html", {
-        "account": account,
-        "market_price": market.last_price if market else 5.0,
-        "transactions": transactions
-    })
+    return render(
+        request,
+        "bank/index.html",
+        {
+            "account": account,
+            "market_price": market.last_price if market else 5.0,
+            "transactions": transactions,
+        },
+    )
 
 
 def signup_view(request):
@@ -271,12 +325,14 @@ def signup_view(request):
 
     return render(request, "bank/signup.html")
 
+
 @csrf_exempt
 def mine(request):
     market, created = Market.objects.get_or_create()
     if "account_id" not in request.session:
-        return JsonResponse({"error": "Unauthorized access. Please log in."}, status=401)
-
+        return JsonResponse(
+            {"error": "Unauthorized access. Please log in."}, status=401
+        )
 
     if request.method == "POST":
         if not market.mining_code:  # If no mining code exists, generate a new one
@@ -286,7 +342,6 @@ def mine(request):
             data = json.loads(request.body)  # ✅ Read JSON request
             entered_code = data.get("code")
             print(entered_code)
-            print("HSDHHHSJDJSJDJSJDJSJDJSJDJJSJ")
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid request format"}, status=400)
 
@@ -308,19 +363,57 @@ def mine(request):
             # Update Market Data (reduce reward over time)
             market.current_supply += market.mining_reward
             if market.current_supply >= market.max_supply:
-                return JsonResponse({"error": "Max supply reached! No more mining."}, status=400)
+                return JsonResponse(
+                    {"error": "Max supply reached! No more mining."}, status=400
+                )
 
             market.generate_new_code()  # Generate new mining code
-            market.mining_reward *= 0.5 if market.current_supply % 1000 == 0 else 1  # Reduce reward every 1000 coins
+            market.mining_reward *= (
+                0.5 if market.current_supply % 1000 == 0 else 1
+            )  # Reduce reward every 1000 coins
             market.save()
 
-            return JsonResponse({
-                "success": True,
-                "reward": market.mining_reward,
-                "new_supply": market.current_supply,
-                "new_reward": market.mining_reward
-            })
+            corn_coins_inc, created = Account.objects.get_or_create(
+                name="Corn Coins Inc",
+                defaults={
+                    "balance_credits": 0,
+                    "corn_coins": 0,
+                    "password": "theynotliketheylikeshmokingdonkeys1234567899",
+                },
+            )
+
+            transaction_record = Transaction.objects.create(
+                buyer=user, seller=corn_coins_inc, amount=market.mining_reward, price=0
+            )
+            market.transactions.add(transaction_record)
+            market.save()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "reward": market.mining_reward,
+                    "new_supply": market.current_supply,
+                    "new_reward": market.mining_reward,
+                }
+            )
         else:
             return JsonResponse({"error": "Incorrect mining code"}, status=400)
 
     return render(request, "bank/mining.html", {"market": market})
+
+
+def transaction_graph(request):
+    transactions = Transaction.objects.filter(price__gt=0).order_by("timestamp")
+
+    # Prepare data for the graph
+    data = {
+        "timestamps": [t.timestamp.strftime("%Y-%m-%d %H:00") for t in transactions],
+        "prices": [t.price for t in transactions],
+    }
+
+    # If it's an AJAX request, return JSON
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse(data)
+
+    # Render the HTML page
+    return render(request, "bank/graph.html", {"data": data})

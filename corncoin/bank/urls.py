@@ -11,5 +11,5 @@ urlpatterns = [
     path("get-user/", get_user_data, name="get-user"),
     path("signup/", signup_view, name="signup"),
     path("mine/", mine, name="mine"),
-
+    path("graph/", transaction_graph, name="transaction_graph"),
 ]

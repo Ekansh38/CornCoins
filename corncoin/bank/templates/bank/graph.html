@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
+    </div>
+</nav>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center text-primary">📈 Corn Coin Transaction History</h2>
+        <canvas id="transactionChart"></canvas>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("{% url 'transaction_graph' %}", { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById("transactionChart").getContext("2d");
+                    new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: data.timestamps,
+                            datasets: [{
+                                label: "Corn Coin Price ($)",
+                                data: data.prices,
+                                borderColor: "#007bff",
+                                backgroundColor: "rgba(0, 123, 255, 0.2)",
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: "Timestamp" }
+                                },
+                                y: {
+                                    title: { display: true, text: "Price ($)" },
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error("Error loading transaction data:", error));
+        });
+    </script>
+</body>
+</html>

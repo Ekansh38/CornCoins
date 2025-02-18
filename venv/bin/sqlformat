@@ -1,4 +1,4 @@
-#!/root/corncoins/venv/bin/python3
+#!/Users/Ekansh/Desktop/CornCoins/venv/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys
