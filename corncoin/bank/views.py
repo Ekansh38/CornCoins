@@ -7,6 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
+from datetime import timedelta
+from django.utils.timezone import now
 
 
 def check_session(request):
@@ -101,8 +103,6 @@ def order_book(request):
 
 from django.db import transaction
 
-from django.db import transaction
-
 
 def match_orders():
     """
@@ -153,6 +153,7 @@ def match_orders():
                             buyer=buyer,
                             seller=seller,
                             amount=trade_amount,
+                            market_price_at_trade=market.last_price,
                             price=trade_price,
                         )
 
@@ -415,5 +416,4 @@ def transaction_graph(request):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse(data)
 
-    # Render the HTML page
     return render(request, "bank/graph.html", {"data": data})
