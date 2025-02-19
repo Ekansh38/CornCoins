@@ -133,19 +133,6 @@
     let highestBuyOrders = [];
 
 
-        function updatePrice() {
-        let orderType = document.getElementById("order-type").value;
-        let priceField = document.getElementById("price");
-        let useOptimal = document.getElementById("use-optimal-price").checked;
-
-        if (useOptimal) {
-            if (orderType === "BUY" && lowestSellPrice !== null) {
-                priceField.value = lowestSellPrice;
-            } else if (orderType === "SELL" && highestBuyPrice !== null) {
-                priceField.value = highestBuyPrice;
-            }
-        }
-    }
 
     function loadUserData() {
         fetch("/get-user/")
@@ -321,6 +308,68 @@ document.getElementById("price").addEventListener("input", updateTotalCost);
             }
         });
     });
+
+    document.getElementById("trade-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    let orderType = document.getElementById("order-type").value;
+    let amount = parseFloat(document.getElementById("amount").value);
+    let price = parseFloat(document.getElementById("price").value);
+    let responseBox = document.getElementById("order-response");
+
+	if (!amount || amount == 0) {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ Order amount must greater than 0.0CC.";
+        responseBox.classList.remove("d-none");
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+        return;
+    }
+
+    if (!price) return;
+
+    let formData = { 
+        order_type: orderType, // Ensures the correct order type is sent
+        amount: amount, 
+        price: price 
+    };
+
+    console.log("🔍 Sending Order Data:", formData);  // Debugging
+
+    // Show "Processing Order..." immediately
+    responseBox.className = "alert alert-warning mt-3";
+    responseBox.innerText = "⏳ Processing Order...";
+    responseBox.classList.remove("d-none");
+
+    fetch("/trade/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🔍 Server Response:", data);  // Debugging
+
+        if (data.error) {
+            responseBox.className = "alert alert-danger mt-3";
+            responseBox.innerText = `❌ ${data.error}`;
+        } else {
+            responseBox.className = "alert alert-success mt-3";
+            responseBox.innerText = `✅ ${data.message}`;
+        }
+
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+
+        loadUserData();
+        loadOrderBook();
+    })
+    .catch(error => {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ An unexpected error occurred. Check the console for details.";
+        console.error("🚨 Fetch Error:", error);
+        setTimeout(() => responseBox.classList.add("d-none"), 3000);
+    });
+});
+
 
     </script>
 
