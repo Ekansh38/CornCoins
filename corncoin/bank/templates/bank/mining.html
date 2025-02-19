@@ -18,6 +18,78 @@
         <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
     </div>
 </nav>
+
+        <!-- Auto Mining Section -->
+<div class="mining-container mt-4">
+    <h2 class="glow">🤖 Auto Mining</h2>
+    <p>Each auto guess costs <strong>5 credits</strong>. If your guess is correct, you mine Corn Coins!</p>
+
+    <!-- Input Fields -->
+    <div class="mb-3">
+        <label for="guess-count">Number of Auto Guesses:</label>
+        <input type="number" id="guess-count" class="mine-input" min="1" value="1">
+    </div>
+
+    <div class="mb-3">
+        <label for="guess-cost">Total Cost (Credits):</label>
+        <input type="number" id="guess-cost" class="mine-input" value="5" readonly>
+    </div>
+
+    <!-- Start Auto Mining Button -->
+    <button class="btn mine-btn" onclick="startAutoMining()">🤖 Start Auto Mining</button>
+
+    <!-- Auto Mining Result -->
+    <p id="auto-mine-response" class="mt-3"></p>
+</div>
+
+<script>
+    // Update cost when user types in either field
+    document.getElementById("guess-count").addEventListener("input", function() {
+        let count = parseInt(this.value) || 0;
+        document.getElementById("guess-cost").value = count * 5;
+    });
+
+    document.getElementById("guess-cost").addEventListener("input", function() {
+        let cost = parseInt(this.value) || 0;
+        document.getElementById("guess-count").value = cost / 5;
+    });
+
+    function startAutoMining() {
+        let guessCount = parseInt(document.getElementById("guess-count").value) || 0;
+        let responseBox = document.getElementById("auto-mine-response");
+
+        if (guessCount < 1) {
+            responseBox.className = "error";
+            responseBox.innerText = "❌ You must buy at least 1 auto guess.";
+            return;
+        }
+
+        // Show processing message
+        responseBox.className = "mining-animation";
+        responseBox.innerText = "🤖 Auto Mining in Progress...";
+
+        fetch("/auto-mine/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ guess_count: guessCount })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                responseBox.className = "success";
+                responseBox.innerText = `✅ ${data.message}`;
+            } else {
+                responseBox.className = "error";
+                responseBox.innerText = `❌ ${data.error}`;
+            }
+        })
+        .catch(error => {
+            responseBox.className = "error";
+            responseBox.innerText = "❌ Auto mining failed.";
+            console.error("Auto Mining Error:", error);
+        });
+    }
+</script>
     
 
     <style>

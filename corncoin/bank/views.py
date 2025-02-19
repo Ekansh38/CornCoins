@@ -9,6 +9,7 @@ from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
 from datetime import timedelta
 from django.utils.timezone import now
+import random
 
 
 def check_session(request):
@@ -506,3 +507,109 @@ def bank_transfer(request):
             return JsonResponse({"error": "Invalid JSON request format"}, status=400)
 
     return render(request, "bank/bank_transfer.html")
+
+
+@csrf_exempt
+def auto_mine(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        guess_count = int(data.get("guess_count", 0))
+        if guess_count < 1:
+            return JsonResponse(
+                {"error": "You must buy at least 1 auto guess"}, status=400
+            )
+    except (ValueError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid data format"}, status=400)
+
+    # Ensure user is logged in
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return JsonResponse({"error": "User not authenticated"}, status=401)
+
+    try:
+        user = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]
+        return JsonResponse({"error": "Invalid account"}, status=401)
+
+    # Deduct the cost (5 credits per guess)
+    total_cost = guess_count * 5
+    if user.balance_credits < total_cost:
+        return JsonResponse({"error": "Insufficient credits"}, status=400)
+
+    user.balance_credits -= total_cost
+    user.save()
+
+    # Get Market Instance
+    market = Market.objects.first()
+    if not market or not market.mining_code:
+        return JsonResponse({"error": "Mining system not ready"}, status=400)
+
+    attempted_codes = set()
+    success = False
+    mined_reward = 0
+
+    for _ in range(guess_count):
+        while True:
+            guess = (
+                f"{random.randint(0, 9)}{random.randint(0, 9)}{random.randint(0, 9)}"
+            )
+            if guess not in attempted_codes:
+                attempted_codes.add(guess)
+                break
+
+        if market.verify_code(guess):
+            success = True
+            mined_reward = market.mining_reward
+            break  # Stop auto-mining if successful
+
+    if success:
+        # Reward user
+        user.corn_coins += mined_reward
+        user.save()
+
+        # Update Market Data
+        market.current_supply += mined_reward
+        if market.current_supply >= market.max_supply:
+            return JsonResponse(
+                {"error": "Max supply reached! No more mining."}, status=400
+            )
+
+        market.generate_new_code()  # Generate a new mining code
+        market.mining_reward *= (
+            0.5 if market.current_supply % 1000 == 0 else 1
+        )  # Reduce reward every 1000 coins
+        market.save()
+
+        # Log transaction
+        corn_coins_inc, created = Account.objects.get_or_create(
+            name="Corn Coins Inc",
+            defaults={
+                "balance_credits": 0,
+                "corn_coins": 0,
+                "password": "theynotliketheylikeshmokingdonkeys1234567899",
+            },
+        )
+
+        transaction_record = Transaction.objects.create(
+            buyer=user, seller=corn_coins_inc, amount=mined_reward, price=0
+        )
+        market.transactions.add(transaction_record)
+        market.save()
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"✅ Auto-mining succeeded! You mined {mined_reward} CC!",
+                "reward": mined_reward,
+                "new_supply": market.current_supply,
+                "new_reward": market.mining_reward,
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "error": "All guesses were incorrect. Try again!"}
+    )

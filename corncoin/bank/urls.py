@@ -13,4 +13,5 @@ urlpatterns = [
     path("mine/", mine, name="mine"),
     path("graph/", transaction_graph, name="transaction_graph"),
     path("bank-transfer/", bank_transfer, name="bank_transfer"),
+    path("auto-mine/", auto_mine, name="auto_mine"),
 ]

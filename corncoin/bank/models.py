@@ -57,9 +57,7 @@ class Market(models.Model):
 
     def generate_new_code(self):
         """Generates a random 3-digit code (allows leading zeros) and encrypts it"""
-        new_code = "{:03d}".format(
-            random.randint(0, 999)
-        )  # Ensures 3 digits (e.g., 001, 123)
+        new_code = str(random.randint(0, 999)).zfill(3)
         self.mining_code_uncensored = new_code
         encrypted_code = cipher.encrypt(new_code.encode()).decode()
         self.mining_code = encrypted_code
