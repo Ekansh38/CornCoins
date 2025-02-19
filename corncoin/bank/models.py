@@ -45,7 +45,7 @@ cipher = Fernet(b"t8CJ46L6jhReAzpD0D4F7L6slYSlofO8okyfhBeYif8=")
 
 
 class Market(models.Model):
-    last_price = models.FloatField(default=120.0)
+    market_price = models.FloatField(default=120.0)
     transactions = models.ManyToManyField("Transaction", blank=True)
     current_supply = models.FloatField(default=0.0)
     max_supply = models.FloatField(default=9999.0)
@@ -74,7 +74,7 @@ class Market(models.Model):
             return False  # If decryption fails
 
     def __str__(self):
-        return f"Market | Last Price: {self.last_price} | Supply: {self.current_supply}/{self.max_supply}"
+        return f"Market | Last Price: {self.market_price} | Supply: {self.current_supply}/{self.max_supply}"
 
 
 class Transaction(models.Model):

@@ -156,7 +156,7 @@ function loadOrderBook() {
             console.log("📜 Loaded Order Book:", data);
 
             // ✅ Update Market Price
-            document.getElementById("market-price").innerText = data.market_price;
+            document.getElementById("market-price").innerText = data.market_price.toFixed(2);;
 
             let buyOrdersList = document.getElementById("buy-orders");
             let sellOrdersList = document.getElementById("sell-orders");

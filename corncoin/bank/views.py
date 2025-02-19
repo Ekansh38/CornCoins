@@ -47,12 +47,24 @@ def logout_view(request):
     return redirect("login")
 
 
-def update_market_price(new_price):
-    """
-    Updates the market price based on the last executed trade.
-    """
-    market, created = Market.objects.get_or_create(id=1)  # Ensure market entry exists
-    market.last_price = new_price
+def update_market_price():
+    # Weighted average of last 3 trades
+    market, created = Market.objects.get_or_create(id=1)
+    non_coinbase_transactions = market.transactions.filter(
+        ~Q(buyer__name="Corn Coins Inc")
+    )
+    last_three_trades = non_coinbase_transactions.order_by("-timestamp")[:3]
+
+    print(last_three_trades)
+
+    # Weighted average of last 3 trades
+    total_amount = sum(t.amount for t in last_three_trades)
+    weighted_prices = [t.price * t.amount for t in last_three_trades]
+    sum_weighted_prices = sum(weighted_prices)
+    new_price = sum_weighted_prices / total_amount
+
+    market.market_price = new_price
+
     market.save()
     print(f"📈 Market Price Updated: ${new_price:.2f}")
 
@@ -60,8 +72,8 @@ def update_market_price(new_price):
 def get_market_price():
     market = Market.objects.first()
     if not market:
-        market = Market.objects.create(last_price=120.0)
-    return market.last_price
+        market = Market.objects.create(market_price=120.0)
+    return market.market_price
 
 
 from .models import Order, Account, Transaction, Market
@@ -80,7 +92,7 @@ def order_book(request):
 
     # Get the latest market price
     market = Market.objects.first()
-    market_price = market.last_price if market else 5.0
+    market_price = market.market_price if market else 5.0
 
     # Format order data with proper user names
     buy_orders_data = [
@@ -153,14 +165,13 @@ def match_orders():
                             buyer=buyer,
                             seller=seller,
                             amount=trade_amount,
-                            market_price_at_trade=market.last_price,
+                            market_price_at_trade=market.market_price,
                             price=trade_price,
                         )
 
                         # Update Market Price
                         market.transactions.add(transaction_record)
-                        market.last_price = trade_price
-                        market.save()
+                        update_market_price()
 
                         # Update Orders (Handle Partial Matches)
                         buy_order.amount -= trade_amount
@@ -306,7 +317,7 @@ def index(request):
         "bank/index.html",
         {
             "account": account,
-            "market_price": market.last_price if market else 5.0,
+            "market_price": market.market_price if market else 5.0,
             "transactions": transactions,
         },
     )
