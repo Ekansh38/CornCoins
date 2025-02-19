@@ -12,4 +12,5 @@ urlpatterns = [
     path("signup/", signup_view, name="signup"),
     path("mine/", mine, name="mine"),
     path("graph/", transaction_graph, name="transaction_graph"),
+    path("bank-transfer/", bank_transfer, name="bank_transfer"),
 ]

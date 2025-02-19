@@ -1,0 +1,124 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>P2P Transfer - Corn Coin</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/style.css' %}"
+    />
+  </head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
+        <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
+        <a class="navbar-brand" href="/graph/">📈 Graph</a>
+        <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
+      </div>
+    </nav>
+
+    <!-- P2P Transfer Form -->
+    <div class="container mt-5">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title text-primary text-center">🏦 P2P Transfer</h4>
+          <form id="transfer-form">
+            <div class="mb-3">
+              <label class="form-label">Receiver Username:</label>
+              <input
+                type="text"
+                id="receiver"
+                name="receiver"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Amount:</label>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                step="any"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Currency Type:</label>
+              <select
+                id="currency-type"
+                name="currency_type"
+                class="form-select"
+              >
+                <option value="credits">Credits</option>
+                <option value="corn_coins">Corn Coins</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+              Send Money
+            </button>
+          </form>
+
+          <div id="transfer-response" class="alert d-none mt-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+ document.getElementById("transfer-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    let receiver = document.getElementById("receiver").value.trim();
+    let amount = document.getElementById("amount").value.trim();
+    let currencyType = document.getElementById("currency-type").value;
+    let responseBox = document.getElementById("transfer-response");
+
+    if (!receiver || !amount || !currencyType) {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ All fields are required.";
+        responseBox.classList.remove("d-none");
+        return;
+    }
+
+    fetch("/bank-transfer/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            receiver: receiver,
+            amount: amount,
+            currency_type: currencyType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            responseBox.className = "alert alert-danger mt-3";
+            responseBox.innerText = `❌ ${data.error}`;
+        } else {
+            responseBox.className = "alert alert-success mt-3";
+            responseBox.innerText = `✅ ${data.success}`;
+        }
+        responseBox.classList.remove("d-none");
+    })
+    .catch(error => {
+        responseBox.className = "alert alert-danger mt-3";
+        responseBox.innerText = "❌ Transfer failed.";
+        console.error("Transfer Error:", error);
+    });
+});   </script>
+  </body>
+</html>

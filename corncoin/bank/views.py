@@ -428,3 +428,81 @@ def transaction_graph(request):
         return JsonResponse(data)
 
     return render(request, "bank/graph.html", {"data": data})
+
+
+@csrf_exempt
+def bank_transfer(request):
+    account_id = request.session.get("account_id")
+
+    if not account_id:
+        return redirect("/logout/")  # Redirect missing users to logout
+
+    try:
+        sender = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]  # Remove invalid session
+        return redirect("/logout/")  # Log out the user
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Ensure JSON format
+            receiver_username = data.get("receiver")
+            amount = data.get("amount")
+            currency_type = data.get("currency_type")
+
+            # Ensure valid input
+            if not receiver_username or not amount or not currency_type:
+                return JsonResponse({"error": "All fields are required"}, status=400)
+
+            try:
+                amount = float(amount)
+                if amount <= 0:
+                    return JsonResponse(
+                        {"error": "Amount must be greater than 0"}, status=400
+                    )
+            except ValueError:
+                return JsonResponse({"error": "Invalid amount format"}, status=400)
+
+            # Check if receiver exists
+            try:
+                receiver = Account.objects.get(name=receiver_username)
+            except Account.DoesNotExist:
+                return JsonResponse({"error": "Receiver not found"}, status=404)
+
+            # Prevent self-transfers
+            if receiver == sender:
+                return JsonResponse(
+                    {"error": "Cannot transfer to yourself"}, status=400
+                )
+
+            # Check sender balance
+            if currency_type == "credits":
+                if sender.balance_credits < amount:
+                    return JsonResponse({"error": "Insufficient credits"}, status=400)
+                sender.balance_credits -= amount
+                receiver.balance_credits += amount
+            elif currency_type == "corn_coins":
+                if sender.corn_coins < amount:
+                    return JsonResponse(
+                        {"error": "Insufficient Corn Coins"}, status=400
+                    )
+                sender.corn_coins -= amount
+                receiver.corn_coins += amount
+            else:
+                return JsonResponse({"error": "Invalid currency type"}, status=400)
+
+            # Save changes
+            sender.save()
+            receiver.save()
+
+            if currency_type == "corn_coins":
+                currency_type = "Corn Coins"
+
+            return JsonResponse(
+                {"success": f"Sent {amount} {currency_type} to {receiver.name}!"}
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON request format"}, status=400)
+
+    return render(request, "bank/bank_transfer.html")
