@@ -160,17 +160,20 @@
 
             data.orders.forEach(order => {
                 let listItem = document.createElement("li");
-                listItem.className = `list-group-item d-flex justify-content-between align-items-center`;
+                listItem.className = `list-group-item d-flex justify-content-between align-items-center ${
+                    order.order_type === "BUY" ? "list-group-item-success" : "list-group-item-danger"
+                }`;
+
                 listItem.innerHTML = `
-                    ${order.amount} CC @ $${order.price.toFixed(2)} (${order.order_type})
-                    <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">🗑️ Delete</button>
+                    <strong>${order.amount} CC</strong> @ <strong>$${order.price.toFixed(2)}</strong> 
+                    (${order.order_type})
+                    <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">❌ Delete</button>
                 `;
                 ordersList.appendChild(listItem);
             });
         })
         .catch(error => console.error("🚨 Error loading user orders:", error));
     }
-
     // ✅ Delete Order Function
     function deleteOrder(orderId) {
         fetch(`/delete-order/${orderId}/`, { method: "POST" })
