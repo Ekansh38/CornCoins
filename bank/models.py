@@ -2,8 +2,12 @@ from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils.timezone import now
 from cryptography.fernet import Fernet
-import base64
 import random
+
+
+class MarketPriceHistory(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=20, decimal_places=10)
 
 
 class Account(models.Model):

@@ -22,6 +22,41 @@
     </div>
 </nav>
 
+<!-- ✅ Market Summary -->
+<div class="card shadow-sm mt-4">
+    <div class="card-body text-center">
+        <h4 class="card-title">📊 Market Summary</h4>
+        <br>
+        <div class="row">
+            <div class="col-md-3">
+                <h5>📉 Lowest Buy</h5>
+                <div class="list-group-item list-group-item-success rounded-pill" id="lowest-buy-box">
+                    <p id="lowest-buy" class="fw-bold m-0">$--</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <h5>📈 Highest Buy</h5>
+                <div class="list-group-item list-group-item-success rounded-pill" id="highest-buy-box">
+                    <p id="highest-buy" class="fw-bold m-0">$--</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <h5>📉 Lowest Sell</h5>
+                <div class="list-group-item list-group-item-danger rounded-pill" id="lowest-sell-box">
+                    <p id="lowest-sell" class="fw-bold m-0">$--</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <h5>📈 Highest Sell</h5>
+                <div class="list-group-item list-group-item-danger rounded-pill" id="highest-sell-box">
+                    <p id="highest-sell" class="fw-bold m-0">$--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Main Content -->
 <div class="container mt-4">
     <div class="row">
@@ -171,7 +206,7 @@
                 listItem.innerHTML = `
                     <strong>${order.amount} CC</strong> @ <strong>$${order.price.toFixed(2)}</strong> 
                     (${order.order_type})
-                    <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">❌ Delete</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">🗑️ Delete</button>
                 `;
                 ordersList.appendChild(listItem);
             });
@@ -235,6 +270,19 @@ function loadOrderBook() {
             // ✅ Clear existing orders
             buyOrdersList.innerHTML = "";
             sellOrdersList.innerHTML = "";
+
+                
+            let lowestBuy = data.buy_orders.length ? Math.min(...data.buy_orders.map(o => o.price)) : "--";
+            let highestBuy = data.buy_orders.length ? Math.max(...data.buy_orders.map(o => o.price)) : "--";
+            let lowestSell = data.sell_orders.length ? Math.min(...data.sell_orders.map(o => o.price)) : "--";
+            let highestSell = data.sell_orders.length ? Math.max(...data.sell_orders.map(o => o.price)) : "--";
+
+            // ✅ Update Market Summary Values
+            document.getElementById("lowest-buy").innerText = lowestBuy !== "--" ? `$${lowestBuy.toFixed(2)}` : "--";
+            document.getElementById("highest-buy").innerText = highestBuy !== "--" ? `$${highestBuy.toFixed(2)}` : "--";
+            document.getElementById("lowest-sell").innerText = lowestSell !== "--" ? `$${lowestSell.toFixed(2)}` : "--";
+            document.getElementById("highest-sell").innerText = highestSell !== "--" ? `$${highestSell.toFixed(2)}` : "--";
+
 
             // ✅ Store sorted orders for pricing calculations
             lowestSellOrders = [...data.sell_orders]

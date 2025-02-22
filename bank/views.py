@@ -1,4 +1,4 @@
-from .models import Account, Order, Market, Transaction
+from .models import Account, Order, Market, Transaction, MarketPriceHistory
 from django.contrib.auth.hashers import check_password
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
@@ -67,6 +67,8 @@ def update_market_price():
 
     market.save()
     print(f"📈 Market Price Updated: ${new_price:.2f}")
+
+    MarketPriceHistory.objects.create(price=new_price)
 
 
 def order_book(request):
@@ -419,12 +421,14 @@ def mine(request):
 
 
 def transaction_graph(request):
-    transactions = Transaction.objects.filter(price__gt=0).order_by("timestamp")
+    market_prices = MarketPriceHistory.objects.order_by("timestamp")[:50]
 
-    # Prepare data for the graph
+    # Extract timestamps & prices
     data = {
-        "timestamps": [t.timestamp.strftime("%Y-%m-%d %H:00") for t in transactions],
-        "prices": [t.price for t in transactions],
+        "timestamps": [
+            entry.timestamp.strftime("%Y-%m-%d %H:%M") for entry in market_prices
+        ],
+        "prices": [entry.price for entry in market_prices],
     }
 
     # If it's an AJAX request, return JSON
