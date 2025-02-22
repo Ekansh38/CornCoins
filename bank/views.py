@@ -51,8 +51,8 @@ def logout_view(request):
 def update_market_price():
     # Weighted average of last 3 trades
     market, created = Market.objects.get_or_create(id=1)
-    non_coinbase_transactions = market.transactions.filter(
-        ~Q(buyer__name="Corn Coins Inc")
+    non_coinbase_transactions = market.transactions.exclude(
+        seller__name="Corn Coins Inc"
     )
     last_three_trades = non_coinbase_transactions.order_by("-timestamp")[:3]
 
