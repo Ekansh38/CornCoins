@@ -16,4 +16,5 @@ urlpatterns = [
     path("auto-mine/", auto_mine, name="auto_mine"),
     path("user-orders/", user_orders, name="user_orders"),
     path("delete-order/<int:order_id>/", delete_order, name="delete_order"),
+    path("market-summary/", market_summary, name="market_summary"),
 ]

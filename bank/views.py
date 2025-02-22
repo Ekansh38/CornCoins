@@ -1,4 +1,5 @@
 from .models import Account, Order, Market, Transaction, MarketPriceHistory
+from django.utils.timezone import now, timedelta
 from django.contrib.auth.hashers import check_password
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
@@ -659,3 +660,28 @@ def delete_order(request, order_id):
     order.delete()
 
     return JsonResponse({"success": "Order deleted successfully"})
+
+
+def market_summary(request):
+    # Get the last 24 hours of transactions
+    last_24_hours = now() - timedelta(hours=24)
+    recent_trades = Transaction.objects.filter(timestamp__gte=last_24_hours)
+
+    # Calculate total trade volume
+    total_volume = sum(trade.amount for trade in recent_trades)
+
+    # Get lowest/highest buy/sell orders
+    lowest_buy = Order.objects.filter(order_type="BUY").order_by("price").first()
+    highest_buy = Order.objects.filter(order_type="BUY").order_by("-price").first()
+    lowest_sell = Order.objects.filter(order_type="SELL").order_by("price").first()
+    highest_sell = Order.objects.filter(order_type="SELL").order_by("-price").first()
+
+    data = {
+        "lowest_buy": lowest_buy.price if lowest_buy else "--",
+        "highest_buy": highest_buy.price if highest_buy else "--",
+        "lowest_sell": lowest_sell.price if lowest_sell else "--",
+        "highest_sell": highest_sell.price if highest_sell else "--",
+        "total_volume": total_volume,
+    }
+
+    return JsonResponse(data)
