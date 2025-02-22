@@ -113,7 +113,15 @@ def match_orders():
     sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by(
         "price", "created_at"
     )
-    print(buy_orders, sell_orders)
+
+    corn_coins_inc, created = Account.objects.get_or_create(
+        name="Corn Coins Inc",
+        defaults={
+            "balance_credits": 0,
+            "corn_coins": 0,
+            "password": "theynotliketheylikeshmokingdonkeys1234567899",
+        },
+    )
 
     market, _ = Market.objects.get_or_create()
 
@@ -134,18 +142,23 @@ def match_orders():
                 buyer = buy_order.user
                 seller = sell_order.user
                 total_cost = trade_amount * trade_price
+                transaction_fee = total_cost * 0.025  # ✅ 2.5% fee
 
                 # Execute trade
                 try:
                     with transaction.atomic():
                         buyer.balance_credits -= total_cost
-                        seller.balance_credits += total_cost
+                        net_received = total_cost - transaction_fee
+                        seller.balance_credits += net_received
 
                         buyer.corn_coins += trade_amount
                         seller.corn_coins -= trade_amount
 
                         buyer.save()
                         seller.save()
+
+                        corn_coins_inc.balance_credits += transaction_fee
+                        corn_coins_inc.save()
 
                         # Record transaction
                         transaction_record = Transaction.objects.create(
@@ -211,7 +224,8 @@ def place_order(request):
 
         if order_type == "BUY":
             total_price = amount * price
-            if user_credits < total_price:
+            fee = total_price * 0.025  # 2.5% fee
+            if user_credits < total_price + fee + fee:
                 return JsonResponse(
                     {"error": "❌ Insufficient funds to place buy order"}, status=400
                 )

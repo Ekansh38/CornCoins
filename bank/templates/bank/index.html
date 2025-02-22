@@ -35,46 +35,50 @@
             </div>
         </div>
 
-        <!-- Left Column: Order Form -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="card-title text-primary">Place Order</h4>
-                    <form id="trade-form">
-                        <div class="mb-3">
-                            <label class="form-label">Order Type:</label>
-                            <select id="order-type" name="order_type" class="form-select">
-                                <option value="BUY">BUY</option>
-                                <option value="SELL">SELL</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Amount:</label>
-                            <input type="number" id="amount" name="amount" step="any" class="form-control" required>
-                        </div>
-
-                        <!-- ✅ Toggle for Optimal Price -->
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" id="use-optimal-price" class="form-check-input">
-                            <label class="form-check-label" for="use-optimal-price">Use Optimal Price</label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Price per Coin:</label>
-                            <input type="number" id="price" name="price" step="any" class="form-control" required>
-                        </div>
-
-                        <p><strong>Total Cost:</strong> $<span id="total-cost">0.00</span></p>
-
-                        <button type="submit" class="btn btn-success w-100">Submit Order</button>
-                    </form>
+<!-- Left Column: Order Form -->
+<div class="col-md-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title text-primary">Place Order</h4>
+            <form id="trade-form">
+                <div class="mb-3">
+                    <label class="form-label">Order Type:</label>
+                    <select id="order-type" name="order_type" class="form-select">
+                        <option value="BUY">BUY</option>
+                        <option value="SELL">SELL</option>
+                    </select>
                 </div>
-            </div>
-            <div id="order-response" class="alert d-none mt-3"></div>
-        </div>
 
-        <!-- Right Column: Order Book -->
+                <div class="mb-3">
+                    <label class="form-label">Amount:</label>
+                    <input type="number" id="amount" name="amount" step="any" class="form-control" required>
+                </div>
+
+                <!-- ✅ Toggle for Optimal Price -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" id="use-optimal-price" class="form-check-input">
+                    <label class="form-check-label" for="use-optimal-price">Use Optimal Price</label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Price per Coin:</label>
+                    <input type="number" id="price" name="price" step="any" class="form-control" required>
+                </div>
+
+                <!-- ✅ Transaction Fee Calculation -->
+                <p><strong>Total Before Fee:</strong> $<span id="total-before-fee">0.00</span></p>
+                <p><strong>Seller Fee (2.5%):</strong> $<span id="transaction-fee">0.00</span></p>
+                <p><strong>Total After Fee:</strong> $<span id="total-after-fee">0.00</span></p>
+
+                <button type="submit" class="btn btn-success w-100">Submit Order</button>
+            </form>
+        </div>
+    </div>
+    <div id="order-response" class="alert d-none mt-3"></div>
+</div>    
+
+
+
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -302,21 +306,33 @@ function calculateOptimalPrice() {
 
     console.log("✅ Optimal price:", totalCost / amount, "Total cost:", totalCost);
 }
-function updateTotalCost() {
-    let amount = parseFloat(document.getElementById("amount").value) || 0;
-    let price = parseFloat(document.getElementById("price").value) || 0;
+    function updateTotalCost() {
+        let orderType = document.getElementById("order-type").value;
 
-    if (amount > 0 && price > 0) {
-        document.getElementById("total-cost").innerText = (amount * price).toFixed(2);
-    } else {
-        document.getElementById("total-cost").innerText = "0.00";
+        let amount = parseFloat(document.getElementById("amount").value) || 0;
+        let price = parseFloat(document.getElementById("price").value) || 0;
+        let totalBeforeFee = amount * price;
+        let transactionFee = totalBeforeFee * 0.025; // 2.5% fee
+        let totalAfterFee;
+
+        if (orderType === "BUY") {
+            totalAfterFee = totalBeforeFee;
+            transactionFee = 0
+        } else {
+            totalAfterFee = totalBeforeFee - transactionFee; // SELL = Deducts fee
+        }
+
+        document.getElementById("total-before-fee").innerText = totalBeforeFee.toFixed(2);
+        document.getElementById("transaction-fee").innerText = transactionFee.toFixed(2);
+        document.getElementById("total-after-fee").innerText = totalAfterFee.toFixed(2);
     }
-}
 
-// 🔹 Auto-update total cost when user types in amount or price
 document.getElementById("amount").addEventListener("input", updateTotalCost);
 document.getElementById("price").addEventListener("input", updateTotalCost);
+document.getElementById("order-type").addEventListener("change", updateTotalCost);
+
     function handleOrderSubmission(event) {
+
         event.preventDefault();
 
         let orderType = document.getElementById("order-type").value;
