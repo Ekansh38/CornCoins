@@ -14,4 +14,6 @@ urlpatterns = [
     path("graph/", transaction_graph, name="transaction_graph"),
     path("bank-transfer/", bank_transfer, name="bank_transfer"),
     path("auto-mine/", auto_mine, name="auto_mine"),
+    path("user-orders/", user_orders, name="user_orders"),
+    path("delete-order/<int:order_id>/", delete_order, name="delete_order"),
 ]
