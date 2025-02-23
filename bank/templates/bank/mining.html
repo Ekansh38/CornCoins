@@ -10,14 +10,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
         <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
         <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
         <a class="navbar-brand" href="/graph/">📈 Graph</a>
         <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
-    </div>
-</nav>
+        <a class="navbar-brand" href="/news/">📰 News</a>
+      </div>
+    </nav>
 
 <!-- Auto Mining Section -->
 <div class="mining-container mt-4">
@@ -215,6 +216,11 @@
         <!-- Mining Response -->
         <p id="mine-response" class="mt-3"></p>
     </div>
+
+    <footer class="text-center text-muted mt-4">
+      <p>© 2025 Corn Coins Inc | Made by Ekansh Goenka</p>
+    </footer>
+
 
     <script>
         function mineCornCoin() {

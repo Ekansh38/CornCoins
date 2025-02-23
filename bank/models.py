@@ -57,12 +57,10 @@ class Market(models.Model):
     mining_code = models.CharField(
         max_length=255, blank=True
     )  # Stores encrypted 3-digit code
-    mining_code_uncensored = models.CharField(max_length=3, blank=True)
 
     def generate_new_code(self):
         """Generates a random 3-digit code (allows leading zeros) and encrypts it"""
         new_code = str(random.randint(0, 999)).zfill(3)
-        self.mining_code_uncensored = new_code
         encrypted_code = cipher.encrypt(new_code.encode()).decode()
         self.mining_code = encrypted_code
         self.save()

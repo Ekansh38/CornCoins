@@ -1,84 +1,47 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>P2P Transfer - Corn Coin</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/style.css' %}"
-    />
-  </head>
-  <body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
-        <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
-        <a class="navbar-brand" href="/graph/">📈 Graph</a>
-        <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
-      </div>
-    </nav>
-
+{% extends "base.html" %}
+    {% block content %}
     <!-- P2P Transfer Form -->
-    <div class="container mt-5">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title text-primary text-center">🏦 P2P Transfer</h4>
-          <form id="transfer-form">
-            <div class="mb-3">
-              <label class="form-label">Receiver Username:</label>
-              <input
-                type="text"
-                id="receiver"
-                name="receiver"
-                class="form-control"
-                required
-              />
-            </div>
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="col-md-8 col-lg-6"> <!-- ✅ Makes it wider but not too big -->
+    <div class="card shadow-lg p-4"> <!-- ✅ Added padding -->
+      <div class="card-body">
+        <h2 class="card-title text-primary text-center mb-4" style="font-size: 2rem;">
+          🏦 P2P Transfer
+        </h2>
 
-            <div class="mb-3">
-              <label class="form-label">Amount:</label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                step="any"
-                class="form-control"
-                required
-              />
-            </div>
+        <form id="transfer-form">
+          <div class="mb-4">
+            <label class="form-label fw-bold" style="font-size: 1.2rem;">Receiver Username:</label>
+            <input type="text" id="receiver" name="receiver" class="form-control form-control-lg" required />
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label">Currency Type:</label>
-              <select
-                id="currency-type"
-                name="currency_type"
-                class="form-select"
-              >
-                <option value="credits">Credits</option>
-                <option value="corn_coins">Corn Coins</option>
-              </select>
-            </div>
+          <div class="mb-4">
+            <label class="form-label fw-bold" style="font-size: 1.2rem;">Amount:</label>
+            <input type="number" id="amount" name="amount" step="any" class="form-control form-control-lg" required />
+          </div>
 
-            <button type="submit" class="btn btn-success w-100">
-              Send Money
-            </button>
-          </form>
+          <div class="mb-4">
+            <label class="form-label fw-bold" style="font-size: 1.2rem;">Currency Type:</label>
+            <select id="currency-type" name="currency_type" class="form-select form-select-lg">
+              <option value="credits">Credits</option>
+              <option value="corn_coins">Corn Coins</option>
+            </select>
+          </div>
 
-          <div id="transfer-response" class="alert d-none mt-3"></div>
-        </div>
+          <button type="submit" class="btn btn-success w-100 py-3 fs-5">
+            💸 Send Money
+          </button>
+        </form>
+
+        <div id="transfer-response" class="alert d-none mt-4 fs-5"></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- JavaScript -->
-    <script>
+    {% endblock %}
+
+    {% block scripts %}
  document.getElementById("transfer-form").addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -119,6 +82,5 @@
         responseBox.innerText = "❌ Transfer failed.";
         console.error("Transfer Error:", error);
     });
-});   </script>
-  </body>
-</html>
+});  
+{% endblock %}

@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
-    {% block content %}
-    <h2 class="text-center text-dark fw-bold">📰 Latest News</h2>
+{% block content %}
+    <br>
+    <div class="text-center">
+        <h2 class="text-dark fw-bold">📰 Latest News</h2>
+    </div>
+
 <div class="container mt-5">
+    <!-- ✅ Perfectly Centered Title -->
 
     <div class="row mt-4">
         {% for article in articles %}
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
                 {% if article.image %}
-                <img src="{{ article.image.url }}" class="card-img-top" alt="News Image">
+                <img src="{{ article.image.url }}" class="card-img-top img-fluid news-image" alt="News Image">
                 {% endif %}
                 <div class="card-body">
                     <h4 class="card-title">{{ article.title }}</h4>
@@ -21,5 +26,13 @@
         <p class="text-center">No news articles available.</p>
         {% endfor %}
     </div>
+
+    <!-- ✅ Perfectly Centered Add News Button -->
 </div>
-    {% endblock %}
+    <div class="d-flex justify-content-center mt-4">
+        <a href="/news/add" class="btn btn-primary shadow-sm px-4 py-2">
+             Add News
+        </a>
+    </div>
+
+{% endblock %}

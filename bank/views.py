@@ -275,7 +275,7 @@ def place_order(request):
         elif order_type == "SELL":
 
             total_selling_power = user_corn_coins - total_existing_sell_amount
-            if total_price > total_selling_power:
+            if amount > total_selling_power:
                 return JsonResponse(
                     {"error": "❌ Insufficient corn coins to place sell order"},
                     status=400,
