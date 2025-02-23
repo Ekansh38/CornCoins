@@ -1,4 +1,6 @@
 from .models import Account, Order, Market, Transaction, MarketPriceHistory
+from django.db.models import Sum
+
 from django.utils.timezone import now, timedelta
 from django.contrib.auth.hashers import check_password
 from django.views.decorators.csrf import csrf_exempt
@@ -7,6 +9,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db import transaction
 import random, json
+
+MAX_ORDERS_PER_USER = 10
 
 
 def check_session(request):
@@ -97,6 +101,20 @@ def order_book(request):
         for order in sell_orders
     ]
 
+    total_limit = 12
+    buy_number = len(buy_orders_data)
+    sell_number = len(sell_orders_data)
+
+    if buy_number + sell_number > total_limit:
+        half_limit = total_limit // 2  # Integer division to ensure it's a whole number
+
+        if buy_number > half_limit and sell_number > half_limit:
+            buy_orders_data = buy_orders_data[:half_limit]
+            sell_orders_data = sell_orders_data[:half_limit]
+        elif buy_number <= half_limit:
+            sell_orders_data = sell_orders_data[: total_limit - buy_number]
+        elif sell_number <= half_limit:
+            buy_orders_data = buy_orders_data[: total_limit - sell_number]
     return JsonResponse(
         {
             "market_price": market_price,
@@ -218,22 +236,43 @@ def place_order(request):
 
         # Check if not negative and can afford
 
-        user_credits = Account.objects.get(
-            id=request.session["account_id"]
-        ).balance_credits
-        user_corn_coins = Account.objects.get(
-            id=request.session["account_id"]
-        ).corn_coins
+        user = Account.objects.get(id=request.session["account_id"])
+        user_credits = user.balance_credits
+        user_corn_coins = user.corn_coins
+
+        open_orders_count = Order.objects.filter(user=user, status="OPEN").count()
+
+        if open_orders_count >= MAX_ORDERS_PER_USER:
+            return JsonResponse({"error": "❌ You have too many open orders!"})
+
+        existing_buy_orders_value = Order.objects.filter(
+            user=user, order_type="BUY", status="OPEN"
+        ).aggregate(Sum("amount"), Sum("price"))
+
+        existing_sell_orders_amount = Order.objects.filter(
+            user=user, order_type="SELL", status="OPEN"
+        ).aggregate(Sum("amount"))
+
+        total_existing_buy_value = (existing_buy_orders_value["amount__sum"] or 0) * (
+            existing_buy_orders_value["price__sum"] or 0
+        )
+        total_existing_sell_amount = existing_sell_orders_amount["amount__sum"] or 0
+
+        print(total_existing_buy_value, total_existing_sell_amount)
+
+        total_price = amount * price
 
         if order_type == "BUY":
-            total_price = amount * price
-            fee = total_price * 0.025  # 2.5% fee
-            if user_credits < total_price + fee + fee:
+            total_buying_power = user_credits - total_existing_buy_value
+            if total_price > total_buying_power:
                 return JsonResponse(
-                    {"error": "❌ Insufficient funds to place buy order"}, status=400
+                    {"error": "❌ Insufficient balance for this order!"}
                 )
+
         elif order_type == "SELL":
-            if user_corn_coins < amount:
+
+            total_selling_power = user_corn_coins - total_existing_sell_amount
+            if total_price > total_selling_power:
                 return JsonResponse(
                     {"error": "❌ Insufficient corn coins to place sell order"},
                     status=400,
@@ -313,7 +352,7 @@ def index(request):
     account = Account.objects.get(id=request.session["account_id"])
     market = Market.objects.first()  # Get the latest market price
 
-    transactions = market.transactions.order_by("-timestamp")[:20] if market else []
+    transactions = market.transactions.order_by("-timestamp") if market else []
 
     return render(
         request,
@@ -685,3 +724,23 @@ def market_summary(request):
     }
 
     return JsonResponse(data)
+
+
+def full_order_book(request):
+    """
+    Renders the full order book page showing all open buy and sell orders.
+    """
+    buy_orders = Order.objects.filter(order_type="BUY", status="OPEN").order_by(
+        "-price", "created_at"
+    )
+    sell_orders = Order.objects.filter(order_type="SELL", status="OPEN").order_by(
+        "price", "created_at"
+    )
+
+    context = {"buy_orders": buy_orders, "sell_orders": sell_orders}
+    return render(request, "bank/order_book.html", context)
+
+
+def all_transactions(request):
+    transactions = Transaction.objects.all().order_by("-timestamp")
+    return render(request, "bank/transactions.html", {"transactions": transactions})

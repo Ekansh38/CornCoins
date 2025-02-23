@@ -1,0 +1,93 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Transactions | Corn Coin Exchange</title>
+
+    <!-- Bootstrap & CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/style.css' %}"
+    />
+
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .transaction-table {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .table-header {
+        background-color: #343a40;
+        color: white;
+        text-align: center;
+      }
+      .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+      .table-striped tbody tr:nth-of-type(even) {
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ✅ Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
+        <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
+        <a class="navbar-brand" href="/graph/">📈 Graph</a>
+        <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
+      </div>
+    </nav>
+
+    <br>
+    <br>
+    {# <h2 class="text-center text-dark">📜 All Transactions</h2> #}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10"> <!-- Adjusted to take up most of the screen -->
+            <h2 class="text-center text-dark fw-bold">📜 All Transactions</h2>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-striped text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Buyer</th>
+                            <th>Seller</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-history">
+                        {% for trade in transactions %}
+                        <tr>
+                            <td>{{ trade.buyer.name }}</td>
+                            <td>{{ trade.seller.name }}</td>
+                            <td>{{ trade.amount }} CC</td>
+                            <td>${{ trade.price }}</td>
+                            <td>{{ trade.timestamp|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No trades yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>    <!-- ✅ Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

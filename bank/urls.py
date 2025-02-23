@@ -17,4 +17,6 @@ urlpatterns = [
     path("user-orders/", user_orders, name="user_orders"),
     path("delete-order/<int:order_id>/", delete_order, name="delete_order"),
     path("market-summary/", market_summary, name="market_summary"),
+    path("order-book/", full_order_book, name="full_order_book"),
+    path("transactions/", all_transactions, name="all_transactions"),
 ]
