@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import *
 
 urlpatterns = [
@@ -19,4 +21,9 @@ urlpatterns = [
     path("market-summary/", market_summary, name="market_summary"),
     path("order-book/", full_order_book, name="full_order_book"),
     path("transactions/", all_transactions, name="all_transactions"),
+    path("news/", news_view, name="news"),
+    path("news/add/", add_news, name="add_news"),  # Page to upload articles
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

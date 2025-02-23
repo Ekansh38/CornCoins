@@ -1,4 +1,7 @@
-from .models import Account, Order, Market, Transaction, MarketPriceHistory
+from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle
+from django.contrib import messages
+
+from .forms import NewsArticleForm
 from django.db.models import Sum
 
 from django.utils.timezone import now, timedelta
@@ -744,3 +747,39 @@ def full_order_book(request):
 def all_transactions(request):
     transactions = Transaction.objects.all().order_by("-timestamp")
     return render(request, "bank/transactions.html", {"transactions": transactions})
+
+
+def news_view(request):
+    """
+    Displays news articles in descending order of time.
+    """
+    articles = NewsArticle.objects.all().order_by("-timestamp")
+    return render(request, "bank/news.html", {"articles": articles})
+
+
+NEWS_PASSWORD = "allhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopiaallhailcorntopia999shitjuice"
+
+
+@csrf_exempt
+def add_news(request):
+    """
+    Handles news article submission including image uploads.
+    Requires a password for access.
+    """
+    if request.method == "POST":
+        entered_password = request.POST.get("password")  # ✅ Get entered password
+
+        if entered_password != NEWS_PASSWORD:
+            messages.error(request, "❌ Incorrect password!")
+            return redirect("add_news")  # Reload the page
+
+        form = NewsArticleForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ News article added successfully!")
+            return redirect("news")  # Redirect to news page after submission
+
+    else:
+        form = NewsArticleForm()
+
+    return render(request, "bank/add_news.html", {"form": form})

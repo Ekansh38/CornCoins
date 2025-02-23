@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5">
+  <h2 class="text-center">📰 Add News Article</h2>
+
+  <!-- ✅ Display Messages -->
+  {% if messages %} {% for message in messages %}
+  <div
+    class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} mt-3"
+  >
+    {{ message }}
+  </div>
+  {% endfor %} {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="mt-4">
+    {% csrf_token %}
+
+    <!-- ✅ Password Field -->
+    <div class="mb-3">
+      <label class="form-label">Enter Password:</label>
+      <input type="password" name="password" class="form-control" required />
+    </div>
+
+    <!-- ✅ News Article Form -->
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary w-100">Submit News</button>
+  </form>
+</div>
+{% endblock %}
