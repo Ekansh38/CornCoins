@@ -1,59 +1,25 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>News | Corn Coin Exchange</title>
+{% extends 'base.html' %}
+    {% block content %}
+    <h2 class="text-center text-dark fw-bold">📰 Latest News</h2>
+<div class="container mt-5">
 
-    <!-- Bootstrap -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    />
-  </head>
-  <body class="bg-light">
-    <!-- ✅ Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="/">🌽 Corn Coin Exchange</a>
-        <a class="navbar-brand" href="/news/">📰 News</a>
-        <a class="navbar-brand" href="/mine/">⛏️ Mine</a>
-        <a class="navbar-brand" href="/graph/">📈 Graph</a>
-      </div>
-    </nav>
-
-    <!-- ✅ News Section -->
-    <div class="container mt-5">
-      <h2 class="text-center text-dark fw-bold">📰 Latest News</h2>
-
-      <div class="row mt-4">
+    <div class="row mt-4">
         {% for article in articles %}
         <div class="col-md-6">
-          <div class="card shadow-sm mb-4">
-            {% if article.image %}
-            <img
-              src="{{ article.image.url }}"
-              class="card-img-top"
-              alt="News Image"
-            />
-            {% endif %}
-            <div class="card-body">
-              <h4 class="card-title">{{ article.title }}</h4>
-              <p class="text-muted">
-                {{ article.timestamp|date:"M d, Y H:i" }}
-              </p>
-              <p class="card-text">{{ article.description }}</p>
+            <div class="card shadow-sm mb-4">
+                {% if article.image %}
+                <img src="{{ article.image.url }}" class="card-img-top" alt="News Image">
+                {% endif %}
+                <div class="card-body">
+                    <h4 class="card-title">{{ article.title }}</h4>
+                    <p class="text-muted">{{ article.timestamp|date:"M d, Y H:i" }}</p>
+                    <p class="card-text">{{ article.description }}</p>
+                </div>
             </div>
-          </div>
         </div>
         {% empty %}
         <p class="text-center">No news articles available.</p>
         {% endfor %}
-      </div>
     </div>
-
-    <!-- ✅ Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
+</div>
+    {% endblock %}
