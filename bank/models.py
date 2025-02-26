@@ -8,13 +8,17 @@ import random
 class MarketPriceHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=20, decimal_places=10)
+    
+    def __str__(self):
+        return f"{self.price} - {self.timestamp}"
 
 
 class Account(models.Model):
     name = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=255)  # Increased length for hashed password
-    balance_credits = models.FloatField(default=100.0)
+    balance_credits = models.FloatField(default=0.0)
     corn_coins = models.FloatField(default=0.0)
+    is_business = models.BooleanField(default=False)  
 
     def save(self, *args, **kwargs):
         # Hash password before saving (if it's not already hashed)
@@ -97,3 +101,33 @@ class NewsArticle(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DirectMessage(models.Model):
+    """
+    Represents a direct message between two users.
+    """
+    sender = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
+    receiver = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="received_messages")
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)  
+    is_bank_transfer = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"DM from {self.sender.name} to {self.receiver.name}: {self.content[:30]}"
+
+
+class GlobalChatMessage(models.Model):
+    """
+    Represents a message in the global chat that all users can see.
+    """
+    sender = models.ForeignKey(Account, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Global Message from {self.sender.name}: {self.content[:30]}"
+
+
+

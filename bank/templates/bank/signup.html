@@ -97,6 +97,12 @@
                 <input type="password" name="confirm_password" id="confirm-password" class="form-control" required placeholder="Confirm password">
             </div>
 
+           <div class="mb-3 form-check">
+                <input type="checkbox" name="is_business" id="is-business" class="form-check-input">
+                <label class="form-check-label" for="is-business">Create as a Business Account</label>
+            </div>
+
+
             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
         </form>
 
@@ -132,12 +138,15 @@
             let password = document.getElementById("password").value;
             let confirmPassword = document.getElementById("confirm-password").value;
             let signupMessage = document.getElementById("signup-message");
+	    let isBusiness = document.getElementById("is-business").checked;
 
             if (password !== confirmPassword) {
                 signupMessage.className = "text-danger";
                 signupMessage.innerText = "❌ Passwords do not match!";
                 return;
             }
+
+           formData.append("is_business", isBusiness);
 
             fetch("/signup/", {
                 method: "POST",
@@ -156,6 +165,9 @@
             })
             .catch(error => console.error("Signup Error:", error));
         });
+
+
+
     </script>
 
 </body>

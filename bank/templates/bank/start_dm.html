@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <h2 class="text-center text-dark fw-bold">📩 Start a New Chat</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <h4 class="text-center">Find a User</h4>
+                    <input type="text" id="search-user" class="form-control form-control-lg mb-3" placeholder="Enter a username...">
+                    <button class="btn btn-success btn-lg w-100" onclick="startDM()">Start Chat</button>
+                    <p id="response-message" class="text-center mt-3 text-danger"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ✅ Maximize Layout */
+    .container-fluid {
+        max-width: 90vw;
+    }
+
+    .card {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    h2 {
+        font-size: 2.5rem;
+    }
+
+    h4 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+
+    input.form-control-lg {
+        font-size: 1.4rem;
+        padding: 15px;
+    }
+
+    .btn-lg {
+        font-size: 1.4rem;
+        padding: 15px;
+    }
+
+    #response-message {
+        font-size: 1.2rem;
+    }
+</style>
+
+
+
+<script>
+function startDM() {
+    let username = document.getElementById("search-user").value.trim();
+    let responseMessage = document.getElementById("response-message");
+
+    if (!username) {
+        responseMessage.innerText = "❌ Please enter a username!";
+        responseMessage.style.color = "red";
+        return;
+    }
+
+    fetch("/dm/start/", {
+        method: "POST",
+        body: JSON.stringify({ username: username }),
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            responseMessage.innerText = data.error;
+            responseMessage.style.color = "red";
+        } else {
+            responseMessage.innerText = "✅ Chat started! Redirecting...";
+            responseMessage.style.color = "green";
+            setTimeout(() => window.location.href = "/dm/", 2000);  // Redirect to DM page
+        }
+    })
+    .catch(error => {
+        responseMessage.innerText = "❌ Error starting chat.";
+        responseMessage.style.color = "red";
+        console.error("🚨 Error:", error);
+    });
+}
+</script>
+
+{% endblock %}

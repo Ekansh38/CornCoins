@@ -21,8 +21,33 @@
         <a class="navbar-brand" href="/graph/">📈 Graph</a>
         <a class="navbar-brand" href="/bank-transfer/">🏦 Bank Transfer</a>
         <a class="navbar-brand" href="/news/">📰 News</a>
+        <a class="navbar-brand" href="/dm/">💬 Direct Messages</a>
       </div>
     </nav>
+
+    <div id="message-notification" class="alert alert-warning d-none">
+    📩 You have unread messages from: <span id="unread-senders"></span>
+</div>
+
+<script>
+function checkUnreadMessages() {
+    fetch("/dm/unread/")
+    .then(response => response.json())
+    .then(data => {
+        if (data.unread_count > 0) {
+            document.getElementById("unread-senders").innerText = data.unread_senders.join(", ");
+            document.getElementById("message-notification").classList.remove("d-none");
+        } else {
+            document.getElementById("message-notification").classList.add("d-none");
+        }
+    })
+    .catch(error => console.error("Error fetching unread messages:", error));
+}
+
+// ✅ Run on page load and check every 5 seconds
+document.addEventListener("DOMContentLoaded", checkUnreadMessages);
+setInterval(checkUnreadMessages, 5000);
+</script>
 
     {# <div class="container mt-4"> #}
 

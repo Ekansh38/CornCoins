@@ -23,6 +23,15 @@ urlpatterns = [
     path("transactions/", all_transactions, name="all_transactions"),
     path("news/", news_view, name="news"),
     path("news/add/", add_news, name="add_news"),  # Page to upload articles
+
+    path("dm/", dm_home, name="dm_home"),
+    path("dm/start/", start_dm, name="start_dm"),
+    path("dm/send/", send_dm, name="send_dm"),
+    path("dm/unread/", unread_messages, name="unread_messages"),  # ✅ Check unread messages
+
+    path("dm/history/<int:user_id>/", get_dm_history, name="get_dm_history"),  # ✅ Fetch past messages
+    path("global/send/", send_global_message, name="send_global"),
+    path("messages/update/", get_new_messages, name="get_new_messages"),
 ]
 
 if settings.DEBUG:

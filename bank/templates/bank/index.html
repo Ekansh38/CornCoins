@@ -56,13 +56,25 @@
     <div class="row">
         <!-- ✅ User Info -->
         <div class="col-12 mb-3">
+		        {% if account.is_business %}
+            <div class="alert alert-warning text-center">
+                <h4>Welcome, <span id="user-name">Loading...</span>! 🏢</h4>
+                <p><strong>Business Balance:</strong> $<span id="balance">Loading...</span></p>
+                <p><strong>Corn Coins:</strong> <span id="corn-coins">Loading...</span> CC</p>
+                <p>This is a <strong>Business Account</strong>.</p>
+                <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        {% else %}
             <div class="alert alert-info text-center">
                 <h4>Welcome, <span id="user-name">Loading...</span>! 👋</h4>
                 <p><strong>Balance:</strong> $<span id="balance">Loading...</span></p>
                 <p><strong>Corn Coins:</strong> <span id="corn-coins">Loading...</span> CC</p>
+                <p>This is a <strong>Personal Account</strong>.</p>
                 <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
             </div>
+        {% endif %}
         </div>
+
 
 <!-- Left Column: Order Form -->
 <div class="col-md-4">

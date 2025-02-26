@@ -1,4 +1,5 @@
-from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle
+from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage
+from django.db.models import Q  
 from django.contrib import messages
 
 from .forms import NewsArticleForm
@@ -375,12 +376,17 @@ def signup_view(request):
     if request.method == "POST":
         username = request.POST.get("name")
         password = request.POST.get("password")
+        is_business = request.POST.get("is_business")
+        if is_business == "true":
+            is_business = True
+        else:
+            is_business = False
 
         if Account.objects.filter(name=username).exists():
             return JsonResponse({"error": "Username already taken."}, status=400)
 
         # Create user
-        Account.objects.create(name=username, password=password)
+        Account.objects.create(name=username, password=password, is_business=is_business)
         return JsonResponse({"message": "Account created successfully!"})
 
     return render(request, "bank/signup.html")
@@ -548,6 +554,10 @@ def bank_transfer(request):
 
             if currency_type == "corn_coins":
                 currency_type = "Corn Coins"
+
+            content = f"💰 Bank Transfer Notification: {sender.name} sent {amount} {currency_type} to you!"
+            DirectMessage.objects.create(sender=sender, receiver=receiver, content=content, is_bank_transfer=True)
+
 
             return JsonResponse(
                 {"success": f"Sent {amount} {currency_type} to {receiver.name}!"}
@@ -757,7 +767,7 @@ def news_view(request):
     return render(request, "bank/news.html", {"articles": articles})
 
 
-NEWS_PASSWORD = "natenansucksballs"
+NEWS_PASSWORD = "newssite1237292hsoh"
 
 
 @csrf_exempt
@@ -783,3 +793,231 @@ def add_news(request):
         form = NewsArticleForm()
 
     return render(request, "bank/add_news.html", {"form": form})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+import json
+
+from .models import Account, DirectMessage, GlobalChatMessage
+
+
+@csrf_exempt
+def send_dm(request):
+    """Handles sending direct messages between users."""
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    try:
+        sender = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]
+        return JsonResponse({"error": "Invalid account"}, status=403)
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            receiver_id = data.get("receiver_id")
+            content = data.get("content")
+
+            if not receiver_id or not content:
+                return JsonResponse({"error": "Missing fields"}, status=400)
+
+            receiver = get_object_or_404(Account, id=receiver_id)
+
+            DirectMessage.objects.create(sender=sender, receiver=receiver, content=content)
+
+            return JsonResponse({"message": "Message sent successfully!"})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+@csrf_exempt
+def send_global_message(request):
+    """Handles sending messages to the global chat."""
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    try:
+        sender = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]
+        return JsonResponse({"error": "Invalid account"}, status=403)
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            content = data.get("content")
+
+            if not content:
+                return JsonResponse({"error": "Message cannot be empty"}, status=400)
+
+            GlobalChatMessage.objects.create(sender=sender, content=content)
+
+            return JsonResponse({"message": "Message sent to global chat!"})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def dm_home(request):
+    """Displays the DM page with existing conversations and global chat."""
+    if "account_id" not in request.session:
+        return redirect("/logout/")
+
+    user = Account.objects.get(id=request.session["account_id"])
+
+    # Get unique conversation partners
+    dm_partners = Account.objects.filter(
+        Q(id__in=DirectMessage.objects.filter(sender=user).values_list("receiver_id", flat=True)) |
+        Q(id__in=DirectMessage.objects.filter(receiver=user).values_list("sender_id", flat=True))
+    ).distinct()
+
+    global_messages = GlobalChatMessage.objects.all().order_by("-timestamp")[:50]
+
+    return render(
+        request,
+        "bank/dm.html",
+        {"dm_partners": dm_partners, "global_messages": global_messages},
+    )
+
+
+
+@csrf_exempt
+def get_dm_history(request, user_id):
+    """Fetches DM history between the logged-in user and the selected receiver."""
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    try:
+        user = Account.objects.get(id=request.session["account_id"])
+    except Account.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=403)
+
+    receiver = get_object_or_404(Account, id=user_id)
+
+    # ✅ Fetch messages between the two users
+    messages = DirectMessage.objects.filter(
+        Q(sender=user, receiver=receiver) | Q(sender=receiver, receiver=user)
+     ).order_by("timestamp")
+
+    unread_messages = messages.filter(receiver=user, is_read=False)
+    unread_messages.update(is_read=True)
+
+    messages_data = [
+            {
+                "sender": msg.sender.name,
+                "content": msg.content,
+                "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M"),
+                "is_bank_transfer": msg.is_bank_transfer,
+            }
+            for msg in messages
+        ]
+
+    return JsonResponse({"messages": messages_data})
+
+
+
+def get_new_messages(request):
+    """Fetches new messages for AJAX refreshing."""
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    user = Account.objects.get(id=request.session["account_id"])
+
+    dms = DirectMessage.objects.filter(receiver=user).order_by("-timestamp")[:20]
+    global_messages = GlobalChatMessage.objects.all().order_by("-timestamp")[:20]
+
+    return JsonResponse({
+        "dms": [{"sender": dm.sender.name, "content": dm.content} for dm in dms],
+        "global": [{"sender": gm.sender.name, "content": gm.content} for gm in global_messages],
+    })
+
+
+
+
+
+
+
+
+
+@csrf_exempt
+def start_dm(request):
+    """
+    Allows a logged-in user to start a DM by entering a username.
+    If a DM does not exist, it creates an empty message to initialize the chat.
+    """
+    account_id = request.session.get("account_id")
+
+    if not account_id:
+        return redirect("/logout/")  # Redirect missing users to logout
+
+    try:
+        account = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]  # Remove invalid session
+        return redirect("/logout/")  # Log out the user
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            username = data.get("username", "").strip()
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "❌ Invalid request format"}, status=400)
+
+        if not username:
+            return JsonResponse({"error": "❌ Please enter a username"}, status=400)
+
+        # ✅ Find receiver account
+        try:
+            receiver = Account.objects.get(name=username)
+        except Account.DoesNotExist:
+            return JsonResponse({"error": "❌ User not found"}, status=404)
+
+        # ✅ Prevent self-chat
+        if receiver == account:
+            return JsonResponse({"error": "❌ You cannot DM yourself!"}, status=400)
+
+        # ✅ Check if a DM already exists
+        existing_dm = DirectMessage.objects.filter(
+            sender=account, receiver=receiver
+        ).exists() or DirectMessage.objects.filter(
+            sender=receiver, receiver=account
+        ).exists()
+
+        if not existing_dm:
+            # ✅ Create an empty message to initialize the chat
+            DirectMessage.objects.create(
+                sender=account,
+                receiver=receiver,
+                content=" ",  # Empty message to start the conversation
+            )
+
+        return JsonResponse({"success": "✅ Chat started!", "receiver_id": receiver.id})
+
+    return render(request, "bank/start_dm.html")
+
+
+
+
+def unread_messages(request):
+    """
+    Fetches the number of unread messages for the logged-in user.
+    """
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    user = get_object_or_404(Account, id=account_id)
+
+    unread = DirectMessage.objects.filter(receiver=user, is_read=False).values("sender").distinct()
+    unread_senders = [Account.objects.get(id=item["sender"]).name for item in unread]
+
+    return JsonResponse({"unread_count": len(unread_senders), "unread_senders": unread_senders})

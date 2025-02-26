@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Account, Order, Market
+from .models import Account, Order, Market, NewsArticle, DirectMessage, GlobalChatMessage, MarketPriceHistory
 
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ("name", "balance_credits", "corn_coins")
+    list_display = ("name", "balance_credits", "corn_coins", "is_business")
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -39,7 +39,25 @@ class MarketAdmin(admin.ModelAdmin):
         "Recent Transactions"  # ✅ Sets column name in admin
     )
 
+class NewsArticleAdmin(admin.ModelAdmin):
+    list_display = ("title", "description", "timestamp")  # ✅ Show in admin panel
+
+
+class DirectMessageAdmin(admin.ModelAdmin):
+    list_display = ("sender", "receiver", "content", "timestamp", "is_bank_transfer")
+    search_fields = ("sender__name", "receiver__name", "content")
+    list_filter = ("timestamp", "is_bank_transfer")
+
+class GlobalChatAdmin(admin.ModelAdmin):
+    list_display = ("sender", "content", "timestamp")
+    search_fields = ("user__name", "content")
+    list_filter = ("timestamp",)
+
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Market, MarketAdmin)
+admin.site.register(NewsArticle, NewsArticleAdmin)
+admin.site.register(DirectMessage, DirectMessageAdmin)
+admin.site.register(GlobalChatMessage, GlobalChatAdmin)
+admin.site.register(MarketPriceHistory)
