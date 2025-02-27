@@ -279,6 +279,20 @@ function scrollToLastMessage() {
         }, 10);
     });
 }
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let openChatId = urlParams.get("open_chat");
+    if (openChatId) {
+        document.querySelector(`[data-user="${openChatId}"]`).click();
+    }
+});
+
+
+
+
 </script>
 
 {% endblock %}

@@ -131,3 +131,27 @@ class GlobalChatMessage(models.Model):
 
 
 
+
+
+class MarketplaceListing(models.Model):
+    LISTING_TYPES = [
+        ("item", "Item for Sale"),
+        ("job", "Job Offer"),
+    ]
+
+    seller = models.ForeignKey("Account", on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    listing_type = models.CharField(max_length=10, choices=LISTING_TYPES)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    image = models.ImageField(upload_to="market_images/", null=True, blank=True)
+    created_at = models.DateTimeField(default=now)
+    is_active = models.BooleanField(default=True)  # Mark as sold/completed
+
+    def close_listing(self):
+        """Marks the listing as inactive (closed)."""
+        self.is_active = False
+        self.save()
+
+    def __str__(self):
+        return f"{self.title} - {self.seller.name}"

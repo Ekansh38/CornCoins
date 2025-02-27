@@ -32,6 +32,15 @@ urlpatterns = [
     path("dm/history/<int:user_id>/", get_dm_history, name="get_dm_history"),  # ✅ Fetch past messages
     path("global/send/", send_global_message, name="send_global"),
     path("messages/update/", get_new_messages, name="get_new_messages"),
+
+    path("marketplace/", marketplace_home, name="marketplace_home"),
+    path("marketplace/add/", add_listing, name="add_listing"),
+    path("marketplace/contact/<int:listing_id>/", contact_seller, name="contact_seller"),
+    path("marketplace/close/<int:listing_id>/", close_listing, name="close_listing"),
+    path("marketplace/<int:listing_id>/", listing_detail_view, name="listing_detail"),
+
+
+
 ]
 
 if settings.DEBUG:

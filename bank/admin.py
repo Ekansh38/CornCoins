@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Account, Order, Market, NewsArticle, DirectMessage, GlobalChatMessage, MarketPriceHistory
+from .models import Account, Order, Market, NewsArticle, DirectMessage, GlobalChatMessage, MarketPriceHistory,MarketplaceListing
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -61,3 +61,4 @@ admin.site.register(NewsArticle, NewsArticleAdmin)
 admin.site.register(DirectMessage, DirectMessageAdmin)
 admin.site.register(GlobalChatMessage, GlobalChatAdmin)
 admin.site.register(MarketPriceHistory)
+admin.site.register(MarketplaceListing)

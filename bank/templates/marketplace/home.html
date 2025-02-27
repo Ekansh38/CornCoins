@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+
+<br>
+<br>
+    <h2 class="text-center fw-bold">🛒 Contopia People (CTP) Marketplace</h2>
+<br>
+    <div class="text-center mb-3">
+        <a href="{% url 'add_listing' %}" class="btn btn-success">➕ Create a Listing</a>
+    </div>
+
+
+
+
+<div class="container mt-5">
+    <div class="row">
+        {% for listing in listings %}
+        <div class="col-md-4">
+   <a href="{% url 'listing_detail' listing.id %}" class="text-decoration-none">
+            <div class="card shadow-sm mb-4 listing-card">
+                {% if listing.image %}
+                <img src="{{ listing.image.url }}" class="card-img-top listing-image" alt="Listing Image">
+                {% endif %}
+                <div class="card-body listing-body">
+                    <h4 class="card-title">{{ listing.title }}</h4>
+                    <p class="text-muted">📍 {{ listing.listing_type|title }}</p>
+                    <p><strong>👤 Seller:</strong> {{ listing.seller.name }}</p>
+
+                    <p class="listing-description">{{ listing.description|truncatechars:100 }}</p>
+
+                    {% if listing.price %}
+                    <p><strong>💰 Price:</strong> ${{ listing.price|floatformat:2 }}</p>
+                    {% endif %}
+                    
+                    <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
+                    
+                    <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary text-white" style="color: white; id="contact-button">📩 Contact Seller</a>
+
+                    {% if listing.seller.id == request.session.account_id and listing.is_active %}
+                    <button class="btn btn-danger mt-2 w-100 close-listing-btn" onclick="closeListing({{ listing.id }})">
+                        Close Listing
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+   </a>
+        {% empty %}
+        <p class="text-center">No listings available.</p>
+        {% endfor %}
+    </div>
+
+
+
+</div>
+<script>
+function closeListing(listingId) {
+    if (!confirm("Are you sure you want to close this listing?")) return;
+
+    fetch(`/marketplace/close/${listingId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("❌ " + data.error);
+        } else {
+            alert("✅ Listing closed!");
+            location.reload();  // Refresh page
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+</script>
+
+<style>
+
+.listing-card {
+    min-width: 300px;  
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+.listing-image {
+    max-height: 160px;  
+    object-fit: cover; 
+}
+
+.listing-body {
+    flex-grow: 1;  
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-description {
+    flex-grow: 1;  
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    white-space: nowrap;
+}
+
+.close-listing-btn {
+    margin-top: auto; 
+}
+
+
+
+.listing-card a {
+    text-decoration: none !important; /* Remove underline */
+    color: inherit !important; /* Prevent color change on hover */
+}
+
+
+
+.listing-card a:hover {
+    color: inherit !important; /* Prevent color change on hover */
+}
+
+.listing-card {
+    transition: transform 0.2s ease-in-out; /* Smooth scaling effect */
+}
+
+.listing-card:hover {
+    transform: scale(1.05); /* Grows 5% bigger on hover */
+}
+
+</style>
+
+{% endblock %}

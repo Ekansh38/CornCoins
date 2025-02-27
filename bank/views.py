@@ -1,6 +1,8 @@
 from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage
 from django.db.models import Q  
 from django.contrib import messages
+from .models import MarketplaceListing
+from .forms import MarketplaceListingForm
 
 from .forms import NewsArticleForm
 from django.db.models import Sum
@@ -1021,3 +1023,96 @@ def unread_messages(request):
     unread_senders = [Account.objects.get(id=item["sender"]).name for item in unread]
 
     return JsonResponse({"unread_count": len(unread_senders), "unread_senders": unread_senders})
+
+
+
+
+
+
+
+
+
+def marketplace_home(request):
+    """
+    Displays all marketplace listings.
+    """
+    listings = MarketplaceListing.objects.filter(is_active=True).order_by("-created_at")
+    return render(request, "marketplace/home.html", {"listings": listings})
+
+
+def add_listing(request):
+    """
+    Allows users to create a marketplace listing.
+    """
+    if "account_id" not in request.session:
+        return redirect("/logout/")  # Require login
+
+    user = get_object_or_404(Account, id=request.session["account_id"])
+
+    if request.method == "POST":
+        form = MarketplaceListingForm(request.POST, request.FILES)
+        if form.is_valid():
+            listing = form.save(commit=False)
+            listing.seller = user
+            listing.save()
+            messages.success(request, "✅ Listing added successfully!")
+            return redirect("marketplace_home")
+    else:
+        form = MarketplaceListingForm()
+
+    return render(request, "marketplace/add_listing.html", {"form": form})
+
+
+def contact_seller(request, listing_id):
+    """
+    Starts a DM with the seller when 'Contact Seller' is clicked.
+    """
+    if "account_id" not in request.session:
+        return redirect("/logout/")
+
+    buyer = get_object_or_404(Account, id=request.session["account_id"])
+    listing = get_object_or_404(MarketplaceListing, id=listing_id)
+
+    # Create a blank DM if no chat exists
+    DirectMessage.objects.create(
+        sender=buyer,
+        receiver=listing.seller,
+        content="(This is an automated message to start a chat about your listing.)"
+    )
+
+    return redirect(f"/dm/?open_chat={listing.seller.id}")
+
+
+
+@csrf_exempt
+def close_listing(request, listing_id):
+    """Allows the seller to close their listing."""
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Not logged in"}, status=403)
+
+    user = get_object_or_404(Account, id=request.session["account_id"])
+    listing = get_object_or_404(MarketplaceListing, id=listing_id)
+
+    if listing.seller != user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    listing.close_listing()
+
+    buyer_id = request.GET.get("buyer_id")  # The buyer’s ID is sent via GET request
+    if buyer_id:
+        buyer = get_object_or_404(Account, id=buyer_id)
+        DirectMessage.objects.create(
+            sender=user,
+            receiver=buyer,
+            content=f"🎉 The listing '{listing.title}' has been closed. Payment should done between the seller and buyer.",
+        )
+
+    return JsonResponse({"message": "Listing closed successfully!"})
+
+
+
+def listing_detail_view(request, listing_id):
+    """Shows a detailed page for a marketplace listing."""
+    listing = get_object_or_404(MarketplaceListing, id=listing_id)
+
+    return render(request, "marketplace/listing_detail.html", {"listing": listing})
