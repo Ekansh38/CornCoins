@@ -921,6 +921,7 @@ def get_dm_history(request, user_id):
                 "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M"),
                 "is_bank_transfer": msg.is_bank_transfer,
                 "sender_id": msg.sender.id,
+                "id": msg.id,
             }
             for msg in messages
         ]

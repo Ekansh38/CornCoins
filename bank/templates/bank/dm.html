@@ -149,14 +149,7 @@ document.querySelectorAll(".dm-contact").forEach(item => {
 });
 
 //  Auto-Check for New Messages Every Second
-setInterval(() => {
-    if (selectedUser) {
-        loadMessages();
-    }
-}, 2500);
-
-
-let profileCache = {};
+let lastLoadedMessageId = null;
 
 function loadMessages() {
     if (!selectedUser) return;
@@ -165,39 +158,46 @@ function loadMessages() {
     .then(response => response.json())
     .then(data => {
         let messageList = document.getElementById("dm-messages");
-        messageList.innerHTML = "";
 
-        if (!data.messages || data.messages.length === 0) {
-            messageList.innerHTML = "<p class='text-center text-muted'>No messages yet.</p>";
-            return;
+        // Find the last message in the list
+        let lastMessageElement = messageList.lastElementChild;
+        let lastMessageId = lastMessageElement ? parseInt(lastMessageElement.dataset.msgId) : null;
+
+        let newMessages = data.messages.filter(msg => !lastMessageId || msg.id > lastMessageId);
+
+        if (newMessages.length === 0) {
+            return;  // No new messages, exit early
         }
 
-        data.messages.forEach(msg => {
+        newMessages.forEach(msg => {
             let messageItem = document.createElement("li");
             messageItem.classList.add("list-group-item", "d-flex", "align-items-center");
+            messageItem.dataset.msgId = msg.id;  // Store message ID to prevent duplicates
 
-            // ✅ Create Profile Image Element
+		if (msg.is_bank_transfer) {
+                messageItem.classList.add("bank-transfer");  // Add class for styling
+            }
+
+
+            // Profile Picture Handling
             let profileImg = document.createElement("img");
             profileImg.classList.add("profile-pic", "me-2");
-            
-            // ✅ Check if we already fetched the profile picture
-            if (profileCache[msg.sender_id]) {
-                profileImg.src = profileCache[msg.sender_id]; // Use cached image
-            } else {
-                profileImg.src = "/media/default_profile.jpg"; // Temporary default
+            profileImg.src = profileCache[msg.sender_id] || "/media/default_profile.jpg";  // Default
 
-                // ✅ Fetch and cache profile picture
+            // Fetch Profile Picture Only If Not Cached
+            if (msg.sender_id && !profileCache[msg.sender_id]) {
                 fetch(`/get-profile/${msg.sender_id}/`)
                 .then(response => response.json())
                 .then(profileData => {
                     if (profileData.profile_picture) {
-                        profileCache[msg.sender_id] = profileData.profile_picture; // Cache it
-                        profileImg.src = profileData.profile_picture; // Set correct image
+                        profileCache[msg.sender_id] = profileData.profile_picture;  // Cache it
+                        profileImg.src = profileData.profile_picture;
                     }
                 })
-                .catch(error => console.error(`Error fetching profile for user ${msg.sender_id}:`, error));
+                .catch(error => console.error("Error fetching profile:", error));
             }
 
+            // Message Content
             let messageContent = document.createElement("span");
             messageContent.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
 
@@ -206,7 +206,7 @@ function loadMessages() {
             messageList.appendChild(messageItem);
         });
 
-        // ✅ Auto-scroll to latest message
+        // Auto-scroll to latest message if user is at bottom
         if (autoScroll) {
             setTimeout(() => {
                 messageList.scrollTo({
@@ -215,11 +215,24 @@ function loadMessages() {
                 });
             }, 50);
         }
+
+        // Update the last loaded message ID
+        lastLoadedMessageId = newMessages[newMessages.length - 1]?.id || lastLoadedMessageId;
     })
     .catch(error => {
         console.error("Error loading messages:", error);
     });
 }
+
+
+setInterval(() => {
+    if (selectedUser) {
+        loadMessages();
+    }
+}, 1000);
+
+let profileCache = {};
+
 
 
 	let autoScroll = true; 
