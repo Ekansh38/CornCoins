@@ -41,6 +41,7 @@ urlpatterns = [
 
     path("profile/update/", update_profile, name="update_profile"),
     path("profile/", profile, name="profile"),
+    path("get-profile/<int:user_id>/", get_user_profile, name="get_user_profile"),
 
 
 ]

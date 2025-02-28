@@ -920,6 +920,7 @@ def get_dm_history(request, user_id):
                 "content": msg.content,
                 "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M"),
                 "is_bank_transfer": msg.is_bank_transfer,
+                "sender_id": msg.sender.id,
             }
             for msg in messages
         ]
@@ -1159,3 +1160,14 @@ def profile(request):
     user = get_object_or_404(Account, id=request.session["account_id"])
     user = get_object_or_404(Account, id=request.session.get("account_id"))
     return render(request, "bank/profile.html", {"user": user})
+
+
+
+def get_user_profile(request, user_id):
+    """Returns JSON data for the user's profile picture and name."""
+    user = get_object_or_404(Account, id=user_id)
+    
+    return JsonResponse({
+        "name": user.name,
+        "profile_picture": user.profile_picture.url if user.profile_picture else "/static/default_profile.jpg"
+    })

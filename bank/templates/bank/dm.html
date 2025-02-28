@@ -4,39 +4,41 @@
 <div class="container-fluid mt-4">
     <h2 class="text-center text-dark fw-bold">💬 Direct Messages</h2>
 
-    <!-- ✅ Start New DM Button -->
+    <!--  Start New DM Button -->
     <div class="text-center mb-3">
         <a href="/dm/start/" class="btn btn-primary btn-lg shadow-sm">➕ Start a New DM</a>
     </div>
 
     <div class="row">
-        <!-- ✅ Sidebar with DM Contacts (Left Column) -->
+        <!--  Sidebar with DM Contacts (Left Column) -->
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
                     <h4 class="text-center">Chats</h4>
-                    <ul class="list-group list-group-flush overflow-auto" style="max-height: 70vh;" id="dm-contacts">
-                        {% for partner in dm_partners %}
-                        <li class="list-group-item dm-contact" data-user="{{ partner.id }}">
-                            <strong>{{ partner.name }}</strong>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-center">No chats available.</li>
-                        {% endfor %}
-                    </ul>
+		    <ul class="list-group list-group-flush overflow-auto" id="dm-contacts">
+    {% for partner in dm_partners %}
+    <li class="list-group-item dm-contact d-flex align-items-center" data-user="{{ partner.id }}">
+        <!-- Placeholder for Profile Picture -->
+        <img src="" alt="Profile" class="profile-pic me-2" id="profile-{{ partner.id }}">
+        <strong>{{ partner.name }}</strong>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-center">No chats available.</li>
+    {% endfor %}
+</ul>
                 </div>
             </div>
         </div>
 
-        <!-- ✅ Main Chat Window (Center Column) -->
+        <!--  Main Chat Window (Center Column) -->
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column">
                     <h4 class="text-center" id="chat-header">Select a chat</h4>
                     <div class="chat-box flex-grow-1 overflow-auto p-3" id="chat-box" style="max-height: 70vh;">
-                        <ul class="list-group chat-messages" id="dm-messages"></ul>
+			    <ul class="list-group chat-messages" id="dm-messages"></ul>
                     </div>
-                    <!-- ✅ Chat Input -->
+                    <!--  Chat Input -->
                     <div class="mt-3">
                         <input type="text" id="chat-input" class="form-control" placeholder="Type a message...">
                         <button class="btn btn-success mt-2 w-100" id="send-btn" disabled>Send</button>
@@ -45,7 +47,7 @@
             </div>
         </div>
 
-        <!-- ✅ Global Chat (Right Column) -->
+        <!--  Global Chat (Right Column) -->
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column">
@@ -67,6 +69,14 @@
 
 <style>
 
+.profile-pic {
+    width: 35px; /* Adjust size */
+    height: 35px;
+    border-radius: 50%; /* Makes it round */
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
 #dm-messages {
     overflow-y: auto;
     max-height: 70vh;
@@ -81,7 +91,7 @@
     font-weight: bold;
 }
 
-    /* ✅ Make the chat layout as big as possible */
+    /*  Make the chat layout as big as possible */
     .container-fluid {
         max-width: 95vw;
     }
@@ -113,7 +123,7 @@
     }
 </style>
 
-<!-- ✅ JavaScript -->
+<!--  JavaScript -->
 <script>
 
 
@@ -122,7 +132,7 @@
 let selectedUser = null;
 let lastMessageTimestamp = null;
 
-// ✅ Handle DM Contact Click
+//  Handle DM Contact Click
 document.querySelectorAll(".dm-contact").forEach(item => {
     item.addEventListener("click", function() {
         selectedUser = this.dataset.user;
@@ -138,16 +148,17 @@ document.querySelectorAll(".dm-contact").forEach(item => {
     });
 });
 
-// ✅ Auto-Check for New Messages Every Second
+//  Auto-Check for New Messages Every Second
 setInterval(() => {
     if (selectedUser) {
         loadMessages();
     }
-}, 1000);
+}, 5000);
 
-// ✅ Load Messages for Selected Chat
-// ✅ Load Messages for Selected Chat
-// ✅ Load Messages for Selected Chat
+
+let profileCache = {};
+
+
 function loadMessages() {
     if (!selectedUser) return;
 
@@ -162,43 +173,54 @@ function loadMessages() {
             return;
         }
 
-
         data.messages.forEach(msg => {
             let messageItem = document.createElement("li");
-            messageItem.className = `list-group-item ${msg.sender === "{{ request.user.name }}" ? 'sent' : 'received'}`;
+            messageItem.classList.add("list-group-item", "d-flex", "align-items-center");
 
-
-            // ✅ If it's a bank transfer, apply Bootstrap warning style
-            if (msg.is_bank_transfer) {
-		messageItem.classList.add("bg-warning", "text-dark")
-                messageItem.innerHTML = `<strong>(OFFICAL)</strong> ${msg.content}`;
-
+            // ✅ Create Profile Image Element
+            let profileImg = document.createElement("img");
+            profileImg.classList.add("profile-pic", "me-2");
+            
+            // ✅ Check if we already fetched the profile picture
+            if (profileCache[msg.sender_id]) {
+                profileImg.src = profileCache[msg.sender_id]; // Use cached image
             } else {
-                messageItem.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
+                profileImg.src = "/media/default_profile.jpg"; // Temporary default
+
+                // ✅ Fetch and cache profile picture
+                fetch(`/get-profile/${msg.sender_id}/`)
+                .then(response => response.json())
+                .then(profileData => {
+                    if (profileData.profile_picture) {
+                        profileCache[msg.sender_id] = profileData.profile_picture; // Cache it
+                        profileImg.src = profileData.profile_picture; // Set correct image
+                    }
+                })
+                .catch(error => console.error(`Error fetching profile for user ${msg.sender_id}:`, error));
             }
 
+            let messageContent = document.createElement("span");
+            messageContent.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
+
+            messageItem.appendChild(profileImg);
+            messageItem.appendChild(messageContent);
             messageList.appendChild(messageItem);
         });
 
-
-
-	            if (autoScroll) {
+        // ✅ Auto-scroll to latest message
+        if (autoScroll) {
             setTimeout(() => {
                 messageList.scrollTo({
-                    top: messageList.scrollHeight + 500,  // Scroll slightly past the last message
-                    behavior: "smooth"  // Enable smooth scrolling
+                    top: messageList.scrollHeight,
+                    behavior: "smooth"
                 });
             }, 50);
         }
-
-
-
-	    })
-	    .catch(error => {
-		console.error("Error loading messages:", error);
-	    });
-	}
-
+    })
+    .catch(error => {
+        console.error("Error loading messages:", error);
+    });
+}
 
 
 
@@ -216,19 +238,19 @@ function loadMessages() {
 
 
 
-	// ✅ Send Direct Message
+	//  Send Direct Message
 	document.getElementById("send-btn").addEventListener("click", function() {
 	    sendMessage();
 	});
 
-	// ✅ Send on Enter Key
+	//  Send on Enter Key
 	document.getElementById("chat-input").addEventListener("keypress", function(event) {
 	    if (event.key === "Enter") {
 		sendMessage();
 	    }
 	});
 
-	// ✅ Send Message Function
+	//  Send Message Function
 	function sendMessage() {
 	    autoScroll = true
 	    let content = document.getElementById("chat-input").value.trim();
@@ -247,7 +269,7 @@ function loadMessages() {
 	    .catch(error => console.error("Error sending message:", error));
 	}
 
-	// ✅ Send Global Message
+	//  Send Global Message
 	document.getElementById("global-btn").addEventListener("click", function() {
 	    let content = document.getElementById("global-input").value.trim();
 	    if (!content) return;
@@ -290,6 +312,21 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".dm-contact").forEach(contact => {
+        let userId = contact.dataset.user;
+        fetch(`/get-profile/${userId}/`)
+        .then(response => response.json())
+        .then(data => {
+            let profilePic = document.getElementById(`profile-${userId}`);
+            if (profilePic && data.profile_picture) {
+                profilePic.src = data.profile_picture;
+            }
+        })
+        .catch(error => console.error(`Error fetching profile for user ${userId}:`, error));
+    });
+});
 
 
 
