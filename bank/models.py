@@ -13,15 +13,19 @@ class MarketPriceHistory(models.Model):
         return f"{self.price} - {self.timestamp}"
 
 
+def default_profile_pic():
+    return "default_profile.jpg"
+
+
 class Account(models.Model):
     name = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=255)  # Increased length for hashed password
     balance_credits = models.FloatField(default=0.0)
     corn_coins = models.FloatField(default=0.0)
     is_business = models.BooleanField(default=False)  
+    profile_picture = models.ImageField(upload_to="profile_pics/", default=default_profile_pic)
 
     def save(self, *args, **kwargs):
-        # Hash password before saving (if it's not already hashed)
         if not self.password.startswith("pbkdf2_sha256$"):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)

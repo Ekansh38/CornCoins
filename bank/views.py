@@ -2,7 +2,7 @@ from .models import Account, Order, Market, Transaction, MarketPriceHistory, New
 from django.db.models import Q  
 from django.contrib import messages
 from .models import MarketplaceListing
-from .forms import MarketplaceListingForm
+from .forms import MarketplaceListingForm, ProfileUpdateForm
 
 from .forms import NewsArticleForm
 from django.db.models import Sum
@@ -1124,3 +1124,37 @@ def listing_detail_view(request, listing_id):
     listing = get_object_or_404(MarketplaceListing, id=listing_id)
 
     return render(request, "marketplace/listing_detail.html", {"listing": listing})
+
+
+
+
+
+
+def update_profile(request):
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Not logged in"}, status=403)
+
+    user = get_object_or_404(Account, id=request.session["account_id"])
+
+
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect("profile")  # ✅ Redirect to profile page
+
+    else:
+        form = ProfileUpdateForm(instance=user)
+
+    return render(request, "bank/update_profile.html", {"form": form})
+
+
+def profile(request):
+    """Displays the user's profile"""
+
+    if "account_id" not in request.session:
+        return JsonResponse({"error": "Not logged in"}, status=403)
+
+    user = get_object_or_404(Account, id=request.session["account_id"])
+    user = get_object_or_404(Account, id=request.session.get("account_id"))
+    return render(request, "bank/profile.html", {"user": user})

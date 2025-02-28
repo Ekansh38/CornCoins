@@ -39,6 +39,8 @@ urlpatterns = [
     path("marketplace/close/<int:listing_id>/", close_listing, name="close_listing"),
     path("marketplace/<int:listing_id>/", listing_detail_view, name="listing_detail"),
 
+    path("profile/update/", update_profile, name="update_profile"),
+    path("profile/", profile, name="profile"),
 
 
 ]

@@ -1,4 +1,5 @@
 from django import forms
+from .models import Account
 from .models import NewsArticle
 
 
@@ -18,3 +19,10 @@ class MarketplaceListingForm(forms.ModelForm):
         widgets = {
             "listing_type": forms.Select(choices=MarketplaceListing.LISTING_TYPES),
         }
+
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ["profile_picture"]

@@ -414,6 +414,9 @@ function calculateOptimalPrice() {
 document.getElementById("amount").addEventListener("input", updateTotalCost);
 document.getElementById("price").addEventListener("input", updateTotalCost);
 document.getElementById("order-type").addEventListener("change", updateTotalCost);
+document.getElementById("use-optimal-price").addEventListener("change", function() {
+    setTimeout(updateTotalCost, 100);
+});
 
     function handleOrderSubmission(event) {
 

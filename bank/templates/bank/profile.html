@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="col-lg-8">  <!-- ✅ Increased width and centered -->
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <!-- ✅ Profile Picture (Centered & Rounded) -->
+                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture mb-3">
+
+                <h2 class="fw-bold">{{ user.name }}</h2>
+                <p class="text-muted fs-5">📧 {{ user.email }}</p>
+
+                <hr>
+
+                <!-- ✅ Two-column layout for balance and corn coins -->
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <p class="fs-5"><strong>💰 Balance:</strong> ${{ user.balance_credits|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-5">
+                        <p class="fs-5"><strong>🌽 Corn Coins:</strong> {{ user.corn_coins }} CC</p>
+                    </div>
+                </div>
+
+                <!-- ✅ Account Type Display -->
+                {% if user.is_business %}
+                <p class="text-success fw-bold fs-5">🏢 Business Account</p>
+                {% else %}
+                <p class="text-primary fw-bold fs-5">👤 Personal Account</p>
+                {% endif %}
+
+                <!-- ✅ Update Profile Button (Centered & Big) -->
+                <a href="/profile/update/" class="btn btn-primary mt-3 btn-lg">✏️ Update Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ✅ Center the profile card */
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+/* ✅ Make the Profile Picture Round & Properly Scaled */
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff; /* Blue border */
+}
+
+/* ✅ Center the Profile Card */
+.card {
+    max-width: 800px; /* ✅ Wider */
+    margin: auto;
+}
+
+/* ✅ Ensure text stays centered */
+.text-center {
+    text-align: center;
+}
+</style>
+
+{% endblock %}
