@@ -24,23 +24,41 @@
                 <div class="card-body listing-body">
                     <h4 class="card-title">{{ listing.title }}</h4>
                     <p class="text-muted">📍 {{ listing.listing_type|title }}</p>
+
+
+
+
+{% if listing.listing_type == "job" %}
+                    <p><strong>👤 Job Poster:</strong> {{ listing.seller.name }}</p>
+{% else %}
                     <p><strong>👤 Seller:</strong> {{ listing.seller.name }}</p>
+{% endif %}
+
+
+
 
                     <p class="listing-description">{{ listing.description|truncatechars:100 }}</p>
 
+		    {% if listing.listing_type == "job" %}
+
+                    {% if listing.price %}
+                    <p><strong>💰 Payment:</strong> ${{ listing.price|floatformat:2 }}</p>
+                    {% endif %}
+		    {% else %}
                     {% if listing.price %}
                     <p><strong>💰 Price:</strong> ${{ listing.price|floatformat:2 }}</p>
                     {% endif %}
+
+		    {% endif %}
                     
                     <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
-                    
-                    <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary text-white" style="color: white; id="contact-button">📩 Contact Seller</a>
 
-                    {% if listing.seller.id == request.session.account_id and listing.is_active %}
-                    <button class="btn btn-danger mt-2 w-100 close-listing-btn" onclick="closeListing({{ listing.id }})">
-                        Close Listing
-                    </button>
-                    {% endif %}
+
+{% if listing.listing_type == "job" %}
+    <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary contact-button">📩 Contact Job Poster</a>
+{% else %}
+    <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary contact-button">📩 Contact Seller</a>
+{% endif %}
                 </div>
             </div>
         </div>
@@ -78,7 +96,7 @@ function closeListing(listingId) {
 
 .listing-card {
     min-width: 300px;  
-    max-height: 500px;
+    max-height: 800px;
     display: flex;
     flex-direction: column;
     overflow: hidden; 
@@ -107,13 +125,15 @@ function closeListing(listingId) {
 }
 
 
-
 .listing-card a {
     text-decoration: none !important; /* Remove underline */
     color: inherit !important; /* Prevent color change on hover */
 }
 
-
+/* Exception: Keep "Contact Seller" button white */
+.listing-card a.contact-button {
+    color: white !important;
+}
 
 .listing-card a:hover {
     color: inherit !important; /* Prevent color change on hover */
@@ -125,6 +145,13 @@ function closeListing(listingId) {
 
 .listing-card:hover {
     transform: scale(1.05); /* Grows 5% bigger on hover */
+}
+
+
+@media (max-width: 768px) {
+    .listing-card {
+        min-width: 100%; /* Full width on smaller screens */
+    }
 }
 
 </style>

@@ -11,14 +11,42 @@
         <div class="col-md-6">
             <h2 class="fw-bold">{{ listing.title }}</h2>
             <p class="text-muted">📍 {{ listing.listing_type|title }}</p>
+
+
+	    {% if listing.listing_type == "job" %}
+            <p><strong>👤 Job Poster:</strong> {{ listing.seller.name }}</p>
+{% else %}
             <p><strong>👤 Seller:</strong> {{ listing.seller.name }}</p>
+{% endif %}
+
+
             <p class="lead">{{ listing.description }}</p>
+
+
+
+	    {% if listing.listing_type == "job" %}
+            {% if listing.price %}
+            <p><strong>💰 Payment:</strong> ${{ listing.price|floatformat:2 }}</p>
+            {% endif %}
+{% else %}
             {% if listing.price %}
             <p><strong>💰 Price:</strong> ${{ listing.price|floatformat:2 }}</p>
             {% endif %}
+{% endif %}
+
+
+
             <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
 
+
+
+{% if listing.listing_type == "job" %}
+            <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Job Poster</a>
+{% else %}
             <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Seller</a>
+{% endif %}
+
+
 
             {% if listing.seller.id == request.session.account_id and listing.is_active %}
             <button class="btn btn-danger mt-2 w-100" onclick="closeListing({{ listing.id }})">
@@ -28,5 +56,28 @@
         </div>
     </div>
 </div>
+
+<script>
+function closeListing(listingId) {
+    fetch(`/marketplace/close/${listingId}/`, {
+        method: "POST"
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Server responded with an error: " + response.status);
+        }
+        return response.json(); // ✅ Parse response JSON
+    })
+    .then(data => {
+	                setTimeout(() => {
+                window.location.href = "/marketplace"; // ✅ Redirect to marketplace page
+            }, 400);
+    })
+    .catch(error => {
+        console.error("❌ Error:", error);
+        alert("❌ Failed to close listing. Please try again.");
+    });
+}
+</script>
 
 {% endblock %}

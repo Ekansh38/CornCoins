@@ -1083,6 +1083,13 @@ def contact_seller(request, listing_id):
     return redirect(f"/dm/?open_chat={listing.seller.id}")
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from .models import MarketplaceListing, Account
+import logging
+
+logger = logging.getLogger(__name__)  # ✅ Add logging for debugging
 
 @csrf_exempt
 def close_listing(request, listing_id):
@@ -1093,21 +1100,22 @@ def close_listing(request, listing_id):
     user = get_object_or_404(Account, id=request.session["account_id"])
     listing = get_object_or_404(MarketplaceListing, id=listing_id)
 
+    # ✅ Debugging print logs (Check if these get printed)
+    logger.info(f"User {user.name} ({user.id}) is trying to close listing {listing.id}.")
+
     if listing.seller != user:
+        logger.warning(f"❌ Unauthorized close attempt by {user.name} on listing {listing.id}.")
         return JsonResponse({"error": "Unauthorized"}, status=403)
 
-    listing.close_listing()
+    try:
+        listing.is_active = False  # ✅ Mark the listing as closed
+        listing.save()
+        logger.info(f"✅ Listing {listing.id} closed successfully.")
+        return JsonResponse({"message": "Listing closed successfully!"})
 
-    buyer_id = request.GET.get("buyer_id")  # The buyer’s ID is sent via GET request
-    if buyer_id:
-        buyer = get_object_or_404(Account, id=buyer_id)
-        DirectMessage.objects.create(
-            sender=user,
-            receiver=buyer,
-            content=f"🎉 The listing '{listing.title}' has been closed. Payment should done between the seller and buyer.",
-        )
-
-    return JsonResponse({"message": "Listing closed successfully!"})
+    except Exception as e:
+        logger.error(f"❌ Error closing listing: {str(e)}")
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 
 
 
