@@ -6,7 +6,6 @@
     </div>
 
 <div class="container mt-5">
-    <!-- ✅ Perfectly Centered Title -->
 
     <div class="row mt-4">
         {% for article in articles %}
@@ -18,7 +17,7 @@
                 <div class="card-body">
                     <h4 class="card-title">{{ article.title }}</h4>
                     <p class="text-muted">{{ article.timestamp|date:"M d, Y H:i" }}</p>
-                    <p class="card-text">{{ article.description }}</p>
+                    <p class="card-text">{{ article.description|linebreaks }}</p>
                 </div>
             </div>
         </div>

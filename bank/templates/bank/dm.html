@@ -153,11 +153,10 @@ setInterval(() => {
     if (selectedUser) {
         loadMessages();
     }
-}, 5000);
+}, 2500);
 
 
 let profileCache = {};
-
 
 function loadMessages() {
     if (!selectedUser) return;
@@ -221,7 +220,6 @@ function loadMessages() {
         console.error("Error loading messages:", error);
     });
 }
-
 
 
 	let autoScroll = true; 

@@ -1171,3 +1171,29 @@ def get_user_profile(request, user_id):
         "name": user.name,
         "profile_picture": user.profile_picture.url if user.profile_picture else "/static/default_profile.jpg"
     })
+
+
+
+
+
+def accounts_list(request):
+    """Renders the /accounts/ page with all users."""
+    accounts = Account.objects.all()
+    return render(request, "bank/accounts.html", {"accounts": accounts})
+
+
+def search_accounts(request):
+    """Returns filtered accounts based on search input."""
+    query = request.GET.get("q", "").strip().lower()
+
+    accounts = Account.objects.filter(name__icontains=query) if query else Account.objects.all()
+
+    data = [
+        {
+            "name": account.name,
+            "profile_picture": account.profile_picture.url if account.profile_picture else "/media/default_profile.jpg"
+        }
+        for account in accounts
+    ]
+
+    return JsonResponse({"accounts": data})

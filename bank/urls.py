@@ -27,9 +27,9 @@ urlpatterns = [
     path("dm/", dm_home, name="dm_home"),
     path("dm/start/", start_dm, name="start_dm"),
     path("dm/send/", send_dm, name="send_dm"),
-    path("dm/unread/", unread_messages, name="unread_messages"),  # ✅ Check unread messages
+    path("dm/unread/", unread_messages, name="unread_messages"),  
 
-    path("dm/history/<int:user_id>/", get_dm_history, name="get_dm_history"),  # ✅ Fetch past messages
+    path("dm/history/<int:user_id>/", get_dm_history, name="get_dm_history"),
     path("global/send/", send_global_message, name="send_global"),
     path("messages/update/", get_new_messages, name="get_new_messages"),
 
@@ -42,6 +42,10 @@ urlpatterns = [
     path("profile/update/", update_profile, name="update_profile"),
     path("profile/", profile, name="profile"),
     path("get-profile/<int:user_id>/", get_user_profile, name="get_user_profile"),
+
+    path("accounts/", accounts_list, name="accounts"),
+    path("accounts/search/", search_accounts, name="search_accounts"),
+
 
 
 ]
