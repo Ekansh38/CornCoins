@@ -334,6 +334,7 @@ def get_user_data(request):
             "name": account.name,
             "balance_credits": account.balance_credits,
             "corn_coins": account.corn_coins,
+            "profile_picture": account.profile_picture.url,
         }
     )
 
@@ -1141,7 +1142,7 @@ def update_profile(request):
         form = ProfileUpdateForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return redirect("profile")  # ✅ Redirect to profile page
+            return redirect("index")
 
     else:
         form = ProfileUpdateForm(instance=user)

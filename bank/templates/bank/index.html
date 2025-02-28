@@ -54,26 +54,91 @@
 <!-- Main Content -->
 <div class="container mt-4">
     <div class="row">
-        <!-- ✅ User Info -->
-        <div class="col-12 mb-3">
-		        {% if account.is_business %}
-            <div class="alert alert-warning text-center">
-                <h4>Welcome, <span id="user-name">Loading...</span>! 🏢</h4>
-                <p><strong>Business Balance:</strong> $<span id="balance">Loading...</span></p>
-                <p><strong>Corn Coins:</strong> <span id="corn-coins">Loading...</span> CC</p>
-                <p>This is a <strong>Business Account</strong>.</p>
-                <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
+        <!-- User Info -->
+
+
+
+
+<div class="container mt-10">
+    <div class="row justify-content-center">
+        <div class="col-lg-12 col-md-12 col-sm-12"> 
+            <div id="user-info" class="alert {% if user.is_business %}alert-warning{% else %}alert-info{% endif %} shadow-sm p-4">
+
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <img id="profile-picture" 
+                             src="{{ user.profile_picture.url }}" 
+                             alt="Profile Picture" 
+                             class="profile-picture">
+                        <h4 class="fw-bold mt-3">{{ user.name }}</h4>
+                    </div>
+
+                    <!-- ✅ Account Info in the Center -->
+                    <div class="col-md-6">
+                        <h2 class="text-center">
+                            Welcome, <span id="user-name">{{ user.name }}</span>! 
+                            {% if user.is_business %} 🏢 {% else %} 👋 {% endif %}
+                        </h2>
+                        <p class="fw-bold text-dark text-center">
+                            {% if user.is_business %}
+                                <span id="account-type">🏢 Business Account</span>
+                            {% else %}
+                                <span id="account-type">👤 Personal Account</span>
+                            {% endif %}
+                        </p>
+
+			<hr>
+                        <!-- ✅ Balance & Corn Coins (Horizontally Arranged) -->
+                        <div class="d-flex justify-content-around mt-3">
+                            <p class="fs-5"><strong>💰 Balance:</strong> $<span id="balance">{{ user.balance_credits|floatformat:2 }}</span></p>
+                            <p class="fs-5"><strong>🌽 Corn Coins:</strong> <span id="corn-coins">{{ user.corn_coins }}</span> CC</p>
+                        </div>
+                    </div>
+
+
+<div class="col-md-3 text-center">
+    <a href="/profile/update/" class="btn btn-primary btn-sm px-2 w-auto d-inline-block" id="update-profile">
+         Update Picture
+    </a>
+
+
+    <a href="/logout/" class="btn btn-danger btn-md px-3 w-auto d-inline-block" id="logout-button">
+        Logout
+    </a>
+</div>
+
+
+                </div> <!-- End of Row -->
             </div>
-        {% else %}
-            <div class="alert alert-info text-center">
-                <h4>Welcome, <span id="user-name">Loading...</span>! 👋</h4>
-                <p><strong>Balance:</strong> $<span id="balance">Loading...</span></p>
-                <p><strong>Corn Coins:</strong> <span id="corn-coins">Loading...</span> CC</p>
-                <p>This is a <strong>Personal Account</strong>.</p>
-                <a href="/logout/" class="btn btn-danger btn-sm">Logout</a>
-            </div>
-        {% endif %}
         </div>
+    </div>
+</div>
+
+<!-- ✅ Clean & Balanced Styling -->
+<style>
+    .profile-picture {
+        max-width: 180px; /* ✅ Original Size */
+        max-height: 180px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #ddd;
+        background: #f8f9fa;
+    }
+
+    #user-info {
+        width: 100%;
+        max-width: 900px; /* ✅ Wider for Better Layout */
+        padding: 30px;
+    }
+
+    .btn-lg {
+        width: 160px; /* ✅ Keeps button sizes consistent */
+    }
+</style>
+
+
+
+
 
 
 <!-- Left Column: Order Form -->
@@ -292,6 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("user-name").innerText = data.name;
                 document.getElementById("balance").innerText = data.balance_credits.toFixed(2);
                 document.getElementById("corn-coins").innerText = data.corn_coins.toFixed(2);
+		console.log(data.profile_picture)
+		document.getElementById("profile-picture").src = data.profile_picture;
             }
         })
         .catch(error => console.error("Error loading user data:", error));
