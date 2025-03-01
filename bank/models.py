@@ -151,6 +151,8 @@ class MarketplaceListing(models.Model):
     image = models.ImageField(upload_to="market_images/", null=True, blank=True)
     created_at = models.DateTimeField(default=now)
     is_active = models.BooleanField(default=True)  
+    price_cc = models.IntegerField(null=True, blank=True)
+
     video = models.FileField(upload_to="marketplace_videos/", blank=True, null=True)  
 
 

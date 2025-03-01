@@ -50,6 +50,22 @@
                     {% endif %}
 
 		    {% endif %}
+
+		    {% if listing.listing_type == "job" %}
+
+                    {% if listing.price_cc %}
+
+
+                    <p><strong>🌽 Corn Coin Payment:</strong> ${{ listing.price_cc|floatformat:2 }}</p>
+		    {% endif %}
+
+		    {% else %}
+                    {% if listing.price_cc %}
+
+                    <p><strong>🌽 Corn Coin Price:</strong> ${{ listing.price_cc|floatformat:2 }}</p>
+                    {% endif %}
+
+		    {% endif %}
                     
                     <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
 

@@ -15,7 +15,7 @@ from .models import MarketplaceListing
 class MarketplaceListingForm(forms.ModelForm):
     class Meta:
         model = MarketplaceListing
-        fields = ["title", "description", "image", "video", "price"]
+        fields = ["title", "description", "image", "video", "price", "price_cc"]
 
     def save(self, commit=True):
         listing = super().save(commit=False)

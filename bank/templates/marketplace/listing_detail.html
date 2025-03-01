@@ -44,6 +44,19 @@
                 {% endif %}
             {% endif %}
 
+	    {% if listing.price_cc %}
+            {% if listing.price %}
+                {% if listing.listing_type == "job" %}
+    <p><strong>🌽 Corn Coin Payment:</strong> {{ listing.price_cc }} CC</p>
+
+                {% else %}
+    <p><strong>🌽 Corn Coin Price:</strong> {{ listing.price_cc }} CC</p>
+
+                {% endif %}
+            {% endif %}
+		{% endif %}
+
+
             <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
 
             <!-- Contact Seller / Job Poster -->
