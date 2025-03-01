@@ -3,51 +3,57 @@
 
 <div class="container mt-5">
     <div class="row">
+        <!-- Image & Video Column -->
         <div class="col-md-6">
             {% if listing.image %}
-            <img src="{{ listing.image.url }}" class="img-fluid rounded shadow-sm" alt="Listing Image">
+            <img src="{{ listing.image.url }}" class="img-fluid rounded shadow-sm mb-3" alt="Listing Image">
+            {% endif %}
+
+            <!-- Video (Only if available) -->
+            {% if listing.video %}
+            <div class="video-container mt-3">
+                <video controls class="w-100">
+                    <source src="{{ listing.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
             {% endif %}
         </div>
+
+        <!-- Details Column -->
         <div class="col-md-6">
             <h2 class="fw-bold">{{ listing.title }}</h2>
             <p class="text-muted">📍 {{ listing.listing_type|title }}</p>
 
-
-	    {% if listing.listing_type == "job" %}
-            <p><strong>👤 Job Poster:</strong> {{ listing.seller.name }}</p>
-{% else %}
-            <p><strong>👤 Seller:</strong> {{ listing.seller.name }}</p>
-{% endif %}
-
-
-            <p class="lead">{{ listing.description }}</p>
-
-
-
-	    {% if listing.listing_type == "job" %}
-            {% if listing.price %}
-            <p><strong>💰 Payment:</strong> ${{ listing.price|floatformat:2 }}</p>
+            <!-- Seller / Job Poster -->
+            {% if listing.listing_type == "job" %}
+                <p><strong>👤 Job Poster:</strong> {{ listing.seller.name }}</p>
+            {% else %}
+                <p><strong>👤 Seller:</strong> {{ listing.seller.name }}</p>
             {% endif %}
-{% else %}
+
+            <!-- Description -->
+            <p class="lead">{{ listing.description|linebreaks }}</p>
+
+            <!-- Price / Payment -->
             {% if listing.price %}
-            <p><strong>💰 Price:</strong> ${{ listing.price|floatformat:2 }}</p>
+                {% if listing.listing_type == "job" %}
+                    <p><strong>💰 Payment:</strong> ${{ listing.price|floatformat:2 }}</p>
+                {% else %}
+                    <p><strong>💰 Price:</strong> ${{ listing.price|floatformat:2 }}</p>
+                {% endif %}
             {% endif %}
-{% endif %}
-
-
 
             <p class="text-muted">🕒 Posted on {{ listing.created_at|date:"M d, Y" }}</p>
 
+            <!-- Contact Seller / Job Poster -->
+            {% if listing.listing_type == "job" %}
+                <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Job Poster</a>
+            {% else %}
+                <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Seller</a>
+            {% endif %}
 
-
-{% if listing.listing_type == "job" %}
-            <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Job Poster</a>
-{% else %}
-            <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Seller</a>
-{% endif %}
-
-
-
+            <!-- Close Listing Button (Only for Owner) -->
             {% if listing.seller.id == request.session.account_id and listing.is_active %}
             <button class="btn btn-danger mt-2 w-100" onclick="closeListing({{ listing.id }})">
                 Close Listing
@@ -57,26 +63,46 @@
     </div>
 </div>
 
+<!-- Styles -->
+<style>
+    .img-fluid {
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .video-container {
+        max-width: 100%;
+        max-height: 400px;
+        overflow: hidden;
+    }
+
+    video {
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<!-- Close Listing Script -->
 <script>
 function closeListing(listingId) {
-    fetch(`/marketplace/close/${listingId}/`, {
-        method: "POST"
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Server responded with an error: " + response.status);
-        }
-        return response.json(); // ✅ Parse response JSON
-    })
-    .then(data => {
-	                setTimeout(() => {
-                window.location.href = "/marketplace"; // ✅ Redirect to marketplace page
+        fetch(`/marketplace/close/${listingId}/`, {
+            method: "POST"
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Server responded with an error: " + response.status);
+            }
+            return response.json(); // Parse response JSON
+        })
+        .then(data => {
+            setTimeout(() => {
+                window.location.href = "/marketplace"; // Redirect to marketplace page
             }, 400);
-    })
-    .catch(error => {
-        console.error("❌ Error:", error);
-        alert("❌ Failed to close listing. Please try again.");
-    });
+        })
+        .catch(error => {
+            console.error("❌ Error:", error);
+            alert("❌ Failed to close listing. Please try again.");
+        });
 }
 </script>
 

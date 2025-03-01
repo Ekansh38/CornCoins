@@ -150,7 +150,9 @@ class MarketplaceListing(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     image = models.ImageField(upload_to="market_images/", null=True, blank=True)
     created_at = models.DateTimeField(default=now)
-    is_active = models.BooleanField(default=True)  # Mark as sold/completed
+    is_active = models.BooleanField(default=True)  
+    video = models.FileField(upload_to="marketplace_videos/", blank=True, null=True)  
+
 
     def close_listing(self):
         """Marks the listing as inactive (closed)."""

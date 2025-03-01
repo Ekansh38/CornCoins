@@ -1050,7 +1050,7 @@ def add_listing(request):
     Allows users to create a marketplace listing.
     """
     if "account_id" not in request.session:
-        return redirect("/logout/")  # Require login
+        return redirect("/logout/")
 
     user = get_object_or_404(Account, id=request.session["account_id"])
 

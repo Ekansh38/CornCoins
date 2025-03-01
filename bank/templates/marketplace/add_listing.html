@@ -1,16 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container mt-5">
+<br>
     <h2 class="text-center fw-bold">➕ Create a Marketplace Listing</h2>
+<div class="container mt-5">
 
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {{ form.as_p }}
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label fw-bold">Title</label>
+                            <input type="text" name="title" id="id_title" class="form-control" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label fw-bold">Description</label>
+                            <textarea name="description" id="id_description" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <!-- Listing Type (Dropdown) -->
+                        <div class="mb-3">
+                            <label for="id_listing_type" class="form-label fw-bold">Listing Type</label>
+                            <select name="listing_type" id="id_listing_type" class="form-control">
+                                <option value="item">🎁 Item</option>
+                                <option value="service">🔧 Service</option>
+                                <option value="job">💼 Job Offer</option>
+                            </select>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label for="id_price" class="form-label fw-bold">💰 Price (Credits)</label>
+                            <input type="number" name="price" id="id_price" class="form-control" min="0">
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label fw-bold">🖼️ Upload Image</label>
+                            <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
+                        </div>
+
+                        <!-- Video Upload -->
+                        <div class="mb-3">
+                            <label for="id_video" class="form-label fw-bold">📹 Upload Video (Optional)</label>
+                            <input type="file" name="video" id="id_video" class="form-control" accept="video/*">
+                        </div>
+
+                        <!-- Submit Button -->
                         <button type="submit" class="btn btn-success w-100">Submit Listing</button>
                     </form>
                 </div>
@@ -18,5 +60,19 @@
         </div>
     </div>
 </div>
+
+<style>
+    .container {
+        max-width: 800px;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+</style>
 
 {% endblock %}
