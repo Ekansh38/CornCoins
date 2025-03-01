@@ -66,6 +66,10 @@
                 <a href="{% url 'contact_seller' listing.id %}" class="btn btn-primary">📩 Contact Seller</a>
             {% endif %}
 
+	    {% if listing.seller.id == request.session.account_id %}
+    <a href="{% url 'edit_listing' listing.id %}" class="btn btn-warning w-100 mt-2">✏️ Edit Listing</a>
+{% endif %}
+
             <!-- Close Listing Button (Only for Owner) -->
             {% if listing.seller.id == request.session.account_id and listing.is_active %}
             <button class="btn btn-danger mt-2 w-100" onclick="closeListing({{ listing.id }})">

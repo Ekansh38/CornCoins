@@ -1209,3 +1209,33 @@ def map(request):
 def momos_menu(request):
     momo = get_object_or_404(Account, name="Momo")
     return render(request, "momos_menu.html", {"momo_id": momo.id})
+
+
+
+def edit_listing(request, listing_id):
+
+    account_id = request.session.get("account_id")
+
+    if not account_id:
+        return redirect("/logout/")  
+
+    try:
+        user = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]  
+        return redirect("/logout/") 
+
+    listing = get_object_or_404(MarketplaceListing, id=listing_id)
+
+    if listing.seller != user:
+        return redirect("marketplace_home")
+
+    if request.method == "POST":
+        form = MarketplaceListingForm(request.POST, request.FILES, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect("listing_detail", listing_id=listing.id)
+    else:
+        form = MarketplaceListingForm(instance=listing)
+
+    return render(request, "marketplace/edit_listing.html", {"form": form, "listing": listing})

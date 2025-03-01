@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<br>
+    <h2 class="text-center fw-bold">✏️ Edit Marketplace Listing</h2>
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-12 col-sm-12"> 
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label class="form-label">Title</label>
+                        <input type="text" name="title" class="form-control" value="{{ listing.title }}" required>
+
+                        <label class="form-label mt-3">Description</label>
+                        <textarea name="description" class="form-control" rows="4">{{ listing.description }}</textarea>
+
+<div class="mb-3">
+    <label for="id_listing_type" class="form-label fw-bold">Listing Type</label>
+    <select name="listing_type" id="id_listing_type" class="form-control">
+        <option value="item" {% if listing.listing_type == "item" %}selected{% endif %}>🎁 Item</option>
+        <option value="service" {% if listing.listing_type == "service" %}selected{% endif %}>🔧 Service</option>
+        <option value="job" {% if listing.listing_type == "job" %}selected{% endif %}>💼 Job Offer</option>
+    </select>
+</div>
+                        <label class="form-label mt-3">Price (Credits)</label>
+                        <input type="number" step="0.01" name="price" class="form-control" value="{{ listing.price|default_if_none:'' }}">
+
+                        <label class="form-label mt-3">Price (Corn Coins)</label>
+                        <input type="number" name="price_cc" class="form-control" value="{{ listing.price_cc|default_if_none:'' }}">
+
+                        <label class="form-label mt-3">Upload Image</label>
+                        <input type="file" name="image" class="form-control">
+                        {% if listing.image %}
+                        <div class="mt-2">
+                            <img src="{{ listing.image.url }}" class="img-thumbnail" width="150">
+                        </div>
+                        {% endif %}
+
+                        <label class="form-label mt-3">Upload Video (Optional)</label>
+                        <input type="file" name="video" class="form-control">
+                        {% if listing.video %}
+                        <div class="mt-2">
+                            <video width="100%" controls>
+                                <source src="{{ listing.video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        {% endif %}
+
+                        <!-- Save Changes Button -->
+                        <button type="submit" class="btn btn-success w-100 mt-4">💾 Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

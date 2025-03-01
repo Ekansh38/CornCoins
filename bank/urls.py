@@ -48,6 +48,9 @@ urlpatterns = [
     path("map/", map, name="map"),
     path("momos-menu/", momos_menu, name="momos_menu"),
 
+    path("marketplace/edit/<int:listing_id>/", edit_listing, name="edit_listing"),
+
+
 
 
 
