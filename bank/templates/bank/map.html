@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fictional Landmass</title>
+
+    <!-- Leaflet.js (Map Library) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Simplex Noise Library -->
+    <script src="https://cdn.jsdelivr.net/npm/simplex-noise@2.4.0/simplex-noise.min.js"></script>
+
+    <style>
+        body { margin: 0; }
+        #map { height: 100vh; width: 100vw; }
+    </style>
+</head>
+<body>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <script>
+        // Initialize Map
+        var map = L.map('map', {
+            center: [0, 0], // Center of the fictional world
+            zoom: 2,
+            minZoom: 1,
+            maxZoom: 6
+        });
+
+        function generateFictionalLandmass() {
+            let canvas = document.createElement("canvas");
+            canvas.width = 800;
+            canvas.height = 800;
+            let ctx = canvas.getContext("2d");
+
+            let noise = new SimplexNoise();
+
+            function getNoiseValue(x, y) {
+                let scale = 0.02; // Controls smoothness of terrain
+                return noise.noise2D(x * scale, y * scale); // Value between -1 and 1
+            }
+
+            function getRadialFalloff(x, y) {
+                let centerX = canvas.width / 2;
+                let centerY = canvas.height / 2;
+                let maxDistance = Math.sqrt(centerX ** 2 + centerY ** 2);
+                let distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+
+                // **Boost falloff effect so water is mostly at edges**
+                let falloff = 1 - Math.pow(distance / maxDistance, 6); // More land by reducing exponent
+                return Math.max(0, falloff); // Ensure values don't go negative
+            }
+
+            // Generate landmass with Perlin noise + radial falloff
+            for (let x = 0; x < canvas.width; x++) {
+                for (let y = 0; y < canvas.height; y++) {
+                    let noiseValue = getNoiseValue(x, y);
+                    let falloff = getRadialFalloff(x, y);
+
+                    let combinedValue = noiseValue * 0.3 + falloff * 0.7; // More weight to falloff for bigger land
+
+                    let color = combinedValue > -0.5 ? "#228B22" : "#1E90FF"; // More landmass
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+            return canvas.toDataURL();
+        }
+
+        // Set the Landmass as a Layer
+        var fictionalMapLayer = L.imageOverlay(generateFictionalLandmass(), [[-50, -50], [50, 50]]);
+        fictionalMapLayer.addTo(map);
+
+        // Example Clickable Regions
+        var regions = [
+            { name: "RANDOM BULIDNG", coords: [10, 10] },
+            { name: "IDK CAVE", coords: [-20, 15] },
+            { name: "BRRRR", coords: [5, -25] }
+        ];
+
+        regions.forEach(region => {
+            let marker = L.marker(region.coords).addTo(map);
+            marker.bindPopup(`<b>${region.name}</b><br>A region of your nation.`);
+        });
+
+    </script>
+
+</body>
+</html>

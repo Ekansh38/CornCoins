@@ -45,10 +45,16 @@ urlpatterns = [
 
     path("accounts/", accounts_list, name="accounts"),
     path("accounts/search/", search_accounts, name="search_accounts"),
+    path("map/", map, name="map"),
+    path("momos-menu/", momos_menu, name="momos_menu"),
+
 
 
 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

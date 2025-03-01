@@ -40,7 +40,7 @@
                     </div>
                     <!--  Chat Input -->
                     <div class="mt-3">
-                        <input type="text" id="chat-input" class="form-control" placeholder="Type a message...">
+			    <textarea id="chat-input" class="form-control" placeholder="Type a message..." rows="1" style="resize: none; overflow-y: hidden;"></textarea>
                         <button class="btn btn-success mt-2 w-100" id="send-btn" disabled>Send</button>
                     </div>
                 </div>
@@ -199,7 +199,7 @@ function loadMessages() {
 
             // Message Content
             let messageContent = document.createElement("span");
-            messageContent.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
+            messageContent.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content.replace(/\\n/g, "<br>")}`;
 
             messageItem.appendChild(profileImg);
             messageItem.appendChild(messageContent);
@@ -265,6 +265,7 @@ let profileCache = {};
 	function sendMessage() {
 	    autoScroll = true
 	    let content = document.getElementById("chat-input").value.trim();
+	   console.log(content)
 	    if (!selectedUser || !content) return;
 
 	    fetch("/dm/send/", {

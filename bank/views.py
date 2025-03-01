@@ -473,7 +473,7 @@ def mine(request):
 
 
 def transaction_graph(request):
-    market_prices = MarketPriceHistory.objects.order_by("timestamp")[:50]
+    market_prices = MarketPriceHistory.objects.order_by("timestamp")[:500]
 
     # Extract timestamps & prices
     data = {
@@ -483,7 +483,6 @@ def transaction_graph(request):
         "prices": [entry.price for entry in market_prices],
     }
 
-    # If it's an AJAX request, return JSON
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse(data)
 
@@ -906,7 +905,6 @@ def get_dm_history(request, user_id):
 
     receiver = get_object_or_404(Account, id=user_id)
 
-    # ✅ Fetch messages between the two users
     messages = DirectMessage.objects.filter(
         Q(sender=user, receiver=receiver) | Q(sender=receiver, receiver=user)
      ).order_by("timestamp")
@@ -917,7 +915,8 @@ def get_dm_history(request, user_id):
     messages_data = [
             {
                 "sender": msg.sender.name,
-                "content": msg.content,
+                "content": msg.content.replace("\n", "\\n"),  # ✅ Encode newlines safely
+
                 "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M"),
                 "is_bank_transfer": msg.is_bank_transfer,
                 "sender_id": msg.sender.id,
@@ -1103,7 +1102,6 @@ def close_listing(request, listing_id):
     user = get_object_or_404(Account, id=request.session["account_id"])
     listing = get_object_or_404(MarketplaceListing, id=listing_id)
 
-    # ✅ Debugging print logs (Check if these get printed)
     logger.info(f"User {user.name} ({user.id}) is trying to close listing {listing.id}.")
 
     if listing.seller != user:
@@ -1198,3 +1196,13 @@ def search_accounts(request):
     ]
 
     return JsonResponse({"accounts": data})
+
+
+def map(request):
+    return render(request, "bank/map.html")
+
+
+
+def momos_menu(request):
+    momo = get_object_or_404(Account, name="Momo")
+    return render(request, "momos_menu.html", {"momo_id": momo.id})

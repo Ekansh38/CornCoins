@@ -3,7 +3,7 @@ from .models import Account, Order, Market, NewsArticle, DirectMessage, GlobalCh
 
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ("name", "balance_credits", "corn_coins", "is_business")
+    list_display = ("name", "balance_credits", "corn_coins", "is_business", "id")
 
 
 class OrderAdmin(admin.ModelAdmin):

@@ -114,18 +114,18 @@
     </div>
 </div>
 
-<!-- ✅ Clean & Balanced Styling -->
 <style>
-    .profile-picture {
-        max-width: 180px; /* ✅ Original Size */
-        max-height: 180px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid #ddd;
-        background: #f8f9fa;
-    }
-
-    #user-info {
+.profile-picture {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ddd;
+    background: #f8f9fa;
+    overflow: hidden; /* Ensure no distortion */
+    aspect-ratio: 1 / 1; /* Ensures a perfect square */
+}
+	#user-info {
         width: 100%;
         max-width: 900px; /* ✅ Wider for Better Layout */
         padding: 30px;
