@@ -1013,7 +1013,7 @@ def start_dm(request):
 
 def unread_messages(request):
     """
-    Fetches the number of unread messages for the logged-in user.
+    Fetches the number of unread messages for the logged-in user and includes sender IDs.
     """
     account_id = request.session.get("account_id")
     if not account_id:
@@ -1022,10 +1022,13 @@ def unread_messages(request):
     user = get_object_or_404(Account, id=account_id)
 
     unread = DirectMessage.objects.filter(receiver=user, is_read=False).values("sender").distinct()
-    unread_senders = [Account.objects.get(id=item["sender"]).name for item in unread]
+
+    unread_senders = [
+        {"id": item["sender"], "name": Account.objects.get(id=item["sender"]).name}
+        for item in unread
+    ]
 
     return JsonResponse({"unread_count": len(unread_senders), "unread_senders": unread_senders})
-
 
 
 

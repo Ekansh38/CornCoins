@@ -1,23 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container text-center mt-5">
-    <h2 class="text-primary">🥟 Momos Cafe Menu</h2>
-    <p class="text-muted">Check out our delicious offerings!</p>
 
-    <!-- Menu Image -->
+<div class="container text-center mt-5">
+
     <div class="menu-container">
-        <img src="{{ MEDIA_URL }}Momos-Cafe-Menu.jpg" alt="Momos Cafe Menu" class="menu-image">
+        <img src="/media/Momos-Cafe-Menu.jpg" alt="Momos Cafe Menu" class="menu-image">
     </div>
 
-    <!-- Contact Momo Button -->
-    <a href="/dm/?open_chat={{ momo_id }}" class="btn btn-primary mt-3">💬 Contact Momo</a>
-
-    <!-- Back to Home Button -->
-    <a href="/" class="btn btn-secondary mt-3">⬅️ Back to Home</a>
 </div>
+    <div class="button-container mt-4">
+        <a href="/dm/?open_chat={{ momo_id }}" class="btn btn-primary">💬 Contact Momo</a>
+        <a href="/" class="btn btn-secondary">⬅️ Back to Home</a>
+    </div>
 
 <style>
+    /* Center & Scale Image */
+    .menu-container {
+        max-width: 90%;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-image {
+        width: 100%;
+        max-width: 600px; /* Restrict max width for larger screens */
+        height: auto;
+        border-radius: 8px;
+    }
+
+    /* Center Buttons */
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn {
+        width: 200px;
+        font-size: 18px;
+        padding: 10px 20px;
+    }
+
     .menu-container {
         max-width: 80%;
         margin: auto;
@@ -32,10 +59,10 @@
         height: auto;
         border-radius: 8px;
     }
-
-    .btn {
-        width: 200px;
-        margin: 10px;
+        .btn {
+            width: 90%;
+            max-width: 250px;
+        }
     }
 </style>
 
