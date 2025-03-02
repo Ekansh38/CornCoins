@@ -1317,12 +1317,14 @@ def slot_machine_view(request):
             # Determine winnings
             if reels[0] == reels[1] == reels[2]:  
                 winnings = bet_amount * Decimal("5")
-                result = "Jackpot! 🎉"
-                message = f"{result} You won {winnings} {currency.replace('_', ' ').title()}!"
+                show_winning = winnings - bet_amount
+                result = "Jackpot! (x5) 🎉"
+                message = f"{result} You won {show_winning} {currency.replace('_', ' ').title()}!"
             elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:  
                 winnings = bet_amount * Decimal("2")
-                result = "Small Win!"
-                message = f"{result} You won {winnings} {currency.replace('_', ' ').title()}!"
+                show_winning = winnings - bet_amount
+                result = "Small Win! (x2)"
+                message = f"{result} You won {show_winnings} {currency.replace('_', ' ').title()}!"
             else:
                 winnings = Decimal("0")
                 result = "Better Luck Next Time!"
