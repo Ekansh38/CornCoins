@@ -1249,7 +1249,7 @@ from .models import Account, SlotMachineHistory
 import json
 
 
-cttpswrd = "jahd8ystf76tr8tgefrhyiruefh796aeyif8atehd8ayesrtah8ew7r6q4tch8ryqv4wh86qtrb4i76rehtv8er7th6yreh8t6vnwr87""::@!&#&y78yb8f6rhw846brqw86rtcbw8e6"
+cttpswrd = "dajsdiuyb8dweyuiy8dbyTV&%VD#@&*^BR76AEF75TABI8YT^&V%U^CR*&RTAEI&^DBUST"
 from decimal import Decimal, ROUND_DOWN
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -1270,11 +1270,11 @@ def slot_machine_view(request):
         del request.session["account_id"]
         return redirect("/logout/")
 
-    # Get Corntopia Treasury Account
+    # Get Corntopia Slot Machine Account
     try:
-        treasury = Account.objects.get(name="Corntopia Treasury")
+        treasury = Account.objects.get(name="Corntopia Slot Machine")
     except Account.DoesNotExist:
-        return JsonResponse({"message": "Treasury account not found!"}, status=500)
+        return JsonResponse({"message": "CT Slot Machine account not found!"}, status=500)
 
     if request.method == "POST":
         try:
@@ -1310,14 +1310,18 @@ def slot_machine_view(request):
 
             # Determine winnings
             if reels[0] == reels[1] == reels[2]:  
-                winnings = bet_amount * Decimal("10")
+                winnings = bet_amount * Decimal("5")
                 result = "Jackpot! 🎉"
+                message = f"{result} You won {winnings} {currency.replace('_', ' ').title()}!"
             elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:  
-                winnings = bet_amount * Decimal("3")
+                winnings = bet_amount * Decimal("2")
                 result = "Small Win!"
+                message = f"{result} You won {winnings} {currency.replace('_', ' ').title()}!"
             else:
                 winnings = Decimal("0")
                 result = "Better Luck Next Time!"
+                message = f"You lost {bet_amount} {currency.replace('_', ' ').title()}! 😢"
+
 
             winnings = winnings.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
@@ -1328,13 +1332,13 @@ def slot_machine_view(request):
                         account.balance_credits += winnings
                         treasury.balance_credits -= winnings
                     else:
-                        return JsonResponse({"message": "Treasury is out of Credits!"}, status=500)
+                        return JsonResponse({"message": "Business is out of Credits!"}, status=500)
                 else:
                     if treasury.corn_coins >= winnings:
                         account.corn_coins += winnings
                         treasury.corn_coins -= winnings
                     else:
-                        return JsonResponse({"message": "Treasury is out of Corn Coins!"}, status=500)
+                        return JsonResponse({"message": "Business is out of Corn Coins!"}, status=500)
 
             # Save balances
             account.save()
@@ -1349,7 +1353,7 @@ def slot_machine_view(request):
             )
 
             return JsonResponse({
-                "message": f"{result} You won {winnings} {currency.replace('_', ' ').title()}!",
+                "message": message,
                 "new_credits": str(account.balance_credits.quantize(Decimal("0.01"), rounding=ROUND_DOWN)),
                 "new_corn_coins": str(account.corn_coins.quantize(Decimal("0.01"), rounding=ROUND_DOWN))
             })

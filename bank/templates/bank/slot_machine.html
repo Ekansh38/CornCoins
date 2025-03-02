@@ -1,22 +1,31 @@
 {% extends 'base.html' %}
-
 {% block content %}
+
+<br><br>
+<div class="balance-wrapper">
+    <h1 class="slot-title">🎰 Slot Machine 🎰</h1>
+    <br>
+    <div class="balance-container">
+        <p>Your Credits: <span id="credits">{{ balance.balance_credits }}</span></p>
+        <p>Your Corn Coins: <span id="corn-coins">{{ balance.corn_coins }}</span></p>
+    </div>
+</div>
 <br>
-    <h1>🎰 Slot Machine 🎰</h1>
-    <p>Your Credits: <span id="credits">{{ balance.balance_credits }}</span></p>
-    <p>Your Corn Coins: <span id="corn-coins">{{ balance.corn_coins }}</span></p>
+
 <div class="container text-center mt-4">
 
-    <div class="slot-machine-container d-flex justify-content-center my-3">
-        <div class="slot-reel" id="reel1">🍒</div>
-        <div class="slot-reel" id="reel2">🍋</div>
-        <div class="slot-reel" id="reel3">🍊</div>
+    <!-- Bigger Slot Machine UI -->
+    <div class="slot-machine">
+        <div class="slot-reel shadow-sm" id="reel1">🍒</div>
+        <div class="slot-reel shadow-sm" id="reel2">🍋</div>
+        <div class="slot-reel shadow-sm" id="reel3">🍊</div>
     </div>
 
-    <form id="slot-form">
+    <!-- Move Form Closer to Slot Machine -->
+    <form id="slot-form" class="mt-3 mx-auto">
         <div class="form-group">
             <label for="bet_amount">Bet Amount:</label>
-            <input type="number" min="0.001" step="0.0001" id="bet_amount" name="bet_amount" min="1" class="form-control w-50 mx-auto" required>
+            <input type="number" id="bet_amount" name="bet_amount" min="0.1" step="0.01" class="form-control w-50 mx-auto" required>
         </div>
 
         <div class="form-group mt-2">
@@ -26,31 +35,77 @@
                 <option value="corn_coins">Corn Coins</option>
             </select>
         </div>
+    <div id="result-message" class="mt-3"></div>
 
         <button type="submit" class="btn btn-primary mt-3" id="spin-button">Spin 🎰</button>
     </form>
 
-    <div id="result-message" class="mt-3"></div>
 </div>
 
 <style>
-    .slot-machine-container {
+    body {
+        background-color: #f8f9fa;
+    }
+
+    /* Balance Section */
+    .balance-wrapper {
+        text-align: center;
+        width: 100%;
+        margin-top: 20px; 
+    }
+
+    .slot-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .balance-container {
+        font-size: 1.2rem;
+        font-weight: bold;
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        text-align: center;
+        width: 300px;
+    }
+
+    /* Bigger Slot Machine */
+    .slot-machine {
         display: flex;
         justify-content: center;
         align-items: center;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+        width: 350px; /* ✅ Made it bigger */
+        margin: auto;
     }
 
+    /* Bigger Slot Reels */
     .slot-reel {
-        width: 80px;
-        height: 80px;
-        font-size: 2rem;
+        width: 100px; /* ✅ Increased size */
+        height: 100px;
+        font-size: 3rem;
         text-align: center;
-        line-height: 80px;
-        margin: 0 10px;
-        background-color: #f8f9fa;
-        border: 2px solid #343a40;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        line-height: 100px;
+        margin: 0 15px;
+        background: linear-gradient(135deg, #ffdf7e, #ffcc00);
+        border: 2px solid #b8860b;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        font-weight: bold;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    /* Reduce Form Spacing */
+    #slot-form {
+        width: 100%;
+        max-width: 400px;
+        margin-top: 20px; /* ✅ Moves form closer to slot machine */
     }
 </style>
 
@@ -58,7 +113,7 @@
 document.getElementById("slot-form").addEventListener("submit", function(event) {
     event.preventDefault(); // Prevent form submission
 
-    let symbols = ["🍒", "🍋", "🍊", "⭐", "💎", "7️⃣", "🍉"];
+    let symbols = ["🍒", "🍋", "🍊", "⭐", "💎", "7️⃣", "🍉", "🌽"];
     let reels = [document.getElementById("reel1"), document.getElementById("reel2"), document.getElementById("reel3")];
     let spinButton = document.getElementById("spin-button");
     let resultMessage = document.getElementById("result-message");
@@ -85,13 +140,18 @@ document.getElementById("slot-form").addEventListener("submit", function(event) 
         if (elapsed < spinDuration) {
             reels.forEach(reel => {
                 reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                reel.classList.add("spin");
             });
             setTimeout(spinReels, interval);
         } else {
+            reels.forEach(reel => reel.classList.remove("spin"));
+
             // Final random results
-            let finalSymbols = [symbols[Math.floor(Math.random() * symbols.length)], 
-                                symbols[Math.floor(Math.random() * symbols.length)], 
-                                symbols[Math.floor(Math.random() * symbols.length)]];
+            let finalSymbols = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
 
             reels[0].textContent = finalSymbols[0];
             reels[1].textContent = finalSymbols[1];
