@@ -1,5 +1,6 @@
-from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage
-from django.db.models import Q  
+from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage, SlotMachineHistory
+from decimal import Decimal, ROUND_DOWN 
+from django.db.models import Q
 from django.contrib import messages
 from .models import MarketplaceListing
 from .forms import MarketplaceListingForm, ProfileUpdateForm
@@ -169,7 +170,7 @@ def match_orders():
                 buyer = buy_order.user
                 seller = sell_order.user
                 total_cost = trade_amount * trade_price
-                transaction_fee = total_cost * 0.025  # ✅ 2.5% fee
+                transaction_fee = total_cost * 0.025  # 2.5% fee
 
                 # Execute trade
                 try:
@@ -779,7 +780,7 @@ def add_news(request):
     Requires a password for access.
     """
     if request.method == "POST":
-        entered_password = request.POST.get("password")  # ✅ Get entered password
+        entered_password = request.POST.get("password")  # Get entered password
 
         if entered_password != NEWS_PASSWORD:
             messages.error(request, "❌ Incorrect password!")
@@ -1239,3 +1240,127 @@ def edit_listing(request, listing_id):
         form = MarketplaceListingForm(instance=listing)
 
     return render(request, "marketplace/edit_listing.html", {"form": form, "listing": listing})
+
+
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Account, SlotMachineHistory
+import json
+
+
+cttpswrd = "jahd8ystf76tr8tgefrhyiruefh796aeyif8atehd8ayesrtah8ew7r6q4tch8ryqv4wh86qtrb4i76rehtv8er7th6yreh8t6vnwr87""::@!&#&y78yb8f6rhw846brqw86rtcbw8e6"
+from decimal import Decimal, ROUND_DOWN
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Account, SlotMachineHistory
+import json
+import traceback  # Import traceback for debugging
+
+def slot_machine_view(request):
+    account_id = request.session.get("account_id")
+
+    if not account_id:
+        return redirect("/logout/")
+
+    try:
+        account = Account.objects.get(id=account_id)
+    except Account.DoesNotExist:
+        del request.session["account_id"]
+        return redirect("/logout/")
+
+    # Get Corntopia Treasury Account
+    try:
+        treasury = Account.objects.get(name="Corntopia Treasury")
+    except Account.DoesNotExist:
+        return JsonResponse({"message": "Treasury account not found!"}, status=500)
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            # Ensure bet_amount is a valid Decimal
+            bet_amount = Decimal(str(data.get("bet_amount", "0.00"))).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            currency = data.get("currency")
+            reels = data.get("reels")
+
+            if bet_amount <= 0:
+                return JsonResponse({"message": "Invalid bet amount!"}, status=400)
+
+            # Convert balances to Decimal before modifying them
+            account.balance_credits = Decimal(str(account.balance_credits)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            account.corn_coins = Decimal(str(account.corn_coins)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            treasury.balance_credits = Decimal(str(treasury.balance_credits)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            treasury.corn_coins = Decimal(str(treasury.corn_coins)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+
+            # Ensure the user has enough balance
+            if currency == "credits":
+                if bet_amount > account.balance_credits:
+                    return JsonResponse({"message": "Not enough Credits!"}, status=400)
+                account.balance_credits -= bet_amount
+                treasury.balance_credits += bet_amount  # Treasury gains money when user loses
+            elif currency == "corn_coins":
+                if bet_amount > account.corn_coins:
+                    return JsonResponse({"message": "Not enough Corn Coins!"}, status=400)
+                account.corn_coins -= bet_amount
+                treasury.corn_coins += bet_amount  # Treasury gains money when user loses
+            else:
+                return JsonResponse({"message": "Invalid currency selection!"}, status=400)
+
+            # Determine winnings
+            if reels[0] == reels[1] == reels[2]:  
+                winnings = bet_amount * Decimal("10")
+                result = "Jackpot! 🎉"
+            elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:  
+                winnings = bet_amount * Decimal("3")
+                result = "Small Win!"
+            else:
+                winnings = Decimal("0")
+                result = "Better Luck Next Time!"
+
+            winnings = winnings.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+
+            # Apply winnings and adjust treasury
+            if winnings > 0:
+                if currency == "credits":
+                    if treasury.balance_credits >= winnings:
+                        account.balance_credits += winnings
+                        treasury.balance_credits -= winnings
+                    else:
+                        return JsonResponse({"message": "Treasury is out of Credits!"}, status=500)
+                else:
+                    if treasury.corn_coins >= winnings:
+                        account.corn_coins += winnings
+                        treasury.corn_coins -= winnings
+                    else:
+                        return JsonResponse({"message": "Treasury is out of Corn Coins!"}, status=500)
+
+            # Save balances
+            account.save()
+            treasury.save()
+
+            # Save game history
+            SlotMachineHistory.objects.create(
+                user=account,
+                bet_amount=bet_amount.quantize(Decimal("0.01"), rounding=ROUND_DOWN),
+                result=result,
+                winnings=winnings
+            )
+
+            return JsonResponse({
+                "message": f"{result} You won {winnings} {currency.replace('_', ' ').title()}!",
+                "new_credits": str(account.balance_credits.quantize(Decimal("0.01"), rounding=ROUND_DOWN)),
+                "new_corn_coins": str(account.corn_coins.quantize(Decimal("0.01"), rounding=ROUND_DOWN))
+            })
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print("🚨 ERROR:", error_details)
+            return JsonResponse({
+                "message": "Something went wrong!",
+                "error": str(e),
+                "details": error_details
+            }, status=500)
+
+    return render(request, "bank/slot_machine.html", {"balance": account})

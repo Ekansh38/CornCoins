@@ -163,3 +163,19 @@ class MarketplaceListing(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.seller.name}"
+
+class SlotMachineHistory(models.Model):
+    CURRENCY_CHOICES = [
+        ("credits", "Credits"),
+        ("corn_coins", "Corn Coins"),
+    ]
+
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    bet_amount = models.IntegerField()
+    currency_used = models.CharField(max_length=10, choices=CURRENCY_CHOICES)
+    result = models.CharField(max_length=20)
+    winnings = models.IntegerField(default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Bet: {self.bet_amount} {self.currency_used} - {self.result} - Won: {self.winnings} {self.currency_used}"

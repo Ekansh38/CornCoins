@@ -49,9 +49,7 @@ urlpatterns = [
     path("momos-menu/", momos_menu, name="momos_menu"),
 
     path("marketplace/edit/<int:listing_id>/", edit_listing, name="edit_listing"),
-
-
-
+    path("slot-machine/", slot_machine_view, name="slot_machine"),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
