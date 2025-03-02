@@ -1294,6 +1294,9 @@ def slot_machine_view(request):
             treasury.balance_credits = Decimal(str(treasury.balance_credits)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
             treasury.corn_coins = Decimal(str(treasury.corn_coins)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
+            if account.name == treasury.name:
+                return JsonResponse({"message": "DONT HACK KIDS!!!!!!!"}, status=400)
+
             # Ensure the user has enough balance
             if currency == "credits":
                 if bet_amount > account.balance_credits:
