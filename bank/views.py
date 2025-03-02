@@ -19,6 +19,9 @@ import random, json
 
 MAX_ORDERS_PER_USER = 10
 
+with open("/opt/CornCoins/keys.json") as f:
+    secrets = json.load(f)
+
 
 def check_session(request):
     """
@@ -770,7 +773,7 @@ def news_view(request):
     return render(request, "bank/news.html", {"articles": articles})
 
 
-NEWS_PASSWORD = "newssite1237292hsoh"
+NEWS_PASSWORD = secerts["news"]
 
 
 @csrf_exempt
@@ -1249,7 +1252,7 @@ from .models import Account, SlotMachineHistory
 import json
 
 
-cttpswrd = "dajsdiuyb8dweyuiy8dbyTV&%VD#@&*^BR76AEF75TABI8YT^&V%U^CR*&RTAEI&^DBUST"
+cttpswrd = secerts["ctsm"]
 from decimal import Decimal, ROUND_DOWN
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
