@@ -178,4 +178,4 @@ class SlotMachineHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - Bet: {self.bet_amount} {self.currency_used} - {self.result} - Won: {self.winnings} {self.currency_used}"
+        return f"{self.user.name} - Bet: {self.bet_amount} {self.currency_used} - {self.result} - Won: {self.winnings} {self.currency_used}"

@@ -19,9 +19,10 @@ import random, json
 
 MAX_ORDERS_PER_USER = 10
 
-with open("/opt/CornCoins/keys.json") as f:
+with open("/opt/CornCoins/keys.json", "r") as f:
     secrets = json.load(f)
-
+    NEWS_PASSWORD = secrets["news"]
+    cttpswrd = secrets["ctsm"]
 
 def check_session(request):
     """
@@ -773,7 +774,6 @@ def news_view(request):
     return render(request, "bank/news.html", {"articles": articles})
 
 
-NEWS_PASSWORD = secerts["news"]
 
 
 @csrf_exempt
@@ -1252,7 +1252,6 @@ from .models import Account, SlotMachineHistory
 import json
 
 
-cttpswrd = secerts["ctsm"]
 from decimal import Decimal, ROUND_DOWN
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -1314,24 +1313,30 @@ def slot_machine_view(request):
             else:
                 return JsonResponse({"message": "Invalid currency selection!"}, status=400)
 
+
             # Determine winnings
-            if reels[0] == reels[1] == reels[2]:  
+            if reels[0] == reels[1] == reels[2]:
                 winnings = bet_amount * Decimal("5")
-                show_winning = winnings - bet_amount
                 result = "Jackpot! (x5) 🎉"
-                message = f"{result} You won {show_winning} {currency.replace('_', ' ').title()}!"
-            elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:  
+            elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:
                 winnings = bet_amount * Decimal("2")
-                show_winning = winnings - bet_amount
                 result = "Small Win! (x2)"
-                message = f"{result} You won {show_winnings} {currency.replace('_', ' ').title()}!"
             else:
                 winnings = Decimal("0")
-                result = "Better Luck Next Time!"
-                message = f"You lost {bet_amount} {currency.replace('_', ' ').title()}! 😢"
+                result = "Better Luck Next Time! 😢"
 
-
+            # Round winnings for precision
             winnings = winnings.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+
+            # Correct `show_winning` calculation with Decimal
+            show_winning = winnings - bet_amount  # No need for float conversion
+
+            # Generate the correct message
+            if winnings > 0:
+                message = f"{result} You won {show_winning:.2f} {currency.replace('_', ' ').title()}!"
+            else:
+                message = f"You lost {bet_amount:.2f} {currency.replace('_', ' ').title()}! 😢"
+
 
             # Apply winnings and adjust treasury
             if winnings > 0:
