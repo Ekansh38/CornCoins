@@ -21,6 +21,38 @@
             <p class="fs-5">{{ article.description|linebreaks }}</p>
         </div>
 
+        <!-- Comment Section -->
+        <div class="comments-section mt-5">
+            <h3 class="fw-bold">💬 Comments</h3>
+
+            {% if user.is_authenticated %}
+            <form method="POST" class="mt-3">
+                {% csrf_token %}
+                <div class="input-group">
+                    <textarea name="comment_text" class="form-control" placeholder="Write a comment..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+            {% else %}
+            <p class="text-muted">You must <a href="/login">log in</a> to comment.</p>
+            {% endif %}
+
+            <div class="comments-list mt-4">
+                {% for comment in comments %}
+                <div class="comment-box">
+                    <img src="{{ comment.user.profile_picture.url }}" class="profile-pic" alt="Profile Picture">
+                    <div class="comment-content">
+                        <p class="comment-user fw-bold">{{ comment.user.username }}</p>
+                        <p class="comment-text">{{ comment.text }}</p>
+                        <p class="comment-time text-muted">{{ comment.timestamp|timesince }} ago</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+        </div>
+
         <!-- Back Button -->
         <div class="text-center mt-4">
             <a href="{% url 'news' %}" class="btn btn-secondary shadow-sm px-4 py-2">
@@ -30,7 +62,6 @@
     </div>
 </div>
 
-<!-- ✅ Improved CSS Styling -->
 <style>
     .news-detail-wrapper {
         max-width: 800px;
@@ -39,13 +70,11 @@
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease-in-out;
     }
 
     .news-title {
         font-size: 2.2rem;
         font-weight: bold;
-        color: #333;
         margin-bottom: 10px;
     }
 
@@ -63,15 +92,10 @@
 
     .news-detail-image {
         width: 100%;
-        max-height: 1000px;
+        max-height: 1200px;
         object-fit: cover;
         border-radius: 8px;
         box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .news-detail-image:hover {
-        transform: scale(1.02);
     }
 
     .news-detail-text {
@@ -82,6 +106,49 @@
         background: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Comments Section */
+    .comments-section {
+        margin-top: 40px;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .comment-box {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .profile-pic {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ddd;
+        margin-right: 10px;
+    }
+
+    .comment-content {
+        flex: 1;
+    }
+
+    .comment-user {
+        margin: 0;
+        font-weight: bold;
+    }
+
+    .comment-text {
+        margin: 5px 0;
+    }
+
+    .comment-time {
+        font-size: 0.85rem;
+        color: #777;
     }
 </style>
 

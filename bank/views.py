@@ -1,4 +1,4 @@
-from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage, SlotMachineHistory
+from .models import Account, Order, Market, Transaction, MarketPriceHistory, NewsArticle, DirectMessage, GlobalChatMessage, SlotMachineHistory, Comment
 import traceback
 from decimal import Decimal, ROUND_DOWN 
 from django.db.models import Q
@@ -1398,7 +1398,20 @@ def slot_machine_view(request):
 
 
 
-
 def news_detail(request, news_id):
     article = get_object_or_404(NewsArticle, id=news_id)
-    return render(request, "bank/news_detail.html", {"article": article})
+    comments = article.comments.all().order_by("-timestamp")  # Fetch comments
+
+    if request.method == "POST":
+        account_id = request.session.get("account_id")
+        if not account_id:
+            return redirect("/logout/")
+        account = Account.objects.get(id=account_id)
+
+        text = request.POST.get("comment_text").strip()
+        if text:
+            Comment.objects.create(article=article, user=account, text=text)
+            messages.success(request, "Comment added successfully!")
+            return redirect("news_detail", news_id=news_id)
+
+    return render(request, "bank/news_detail.html", {"article": article, "comments": comments})

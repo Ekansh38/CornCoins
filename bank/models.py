@@ -183,3 +183,15 @@ class SlotMachineHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.name} - Bet: {self.bet_amount} {self.currency_used} - {self.result} - Won: {self.winnings} {self.currency_used}"
+
+
+
+
+class Comment(models.Model):
+    article = models.ForeignKey(NewsArticle, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.name} on {self.article.title}"
