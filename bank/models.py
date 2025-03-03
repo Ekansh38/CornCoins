@@ -138,15 +138,19 @@ class GlobalChatMessage(models.Model):
 
 
 class MarketplaceListing(models.Model):
+
     LISTING_TYPES = [
-        ("item", "Item for Sale"),
-        ("job", "Job Offer"),
+        ("item", "Item"),
+        ("job", "Job"),
+        ("service", "Service"),
     ]
 
     seller = models.ForeignKey("Account", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    listing_type = models.CharField(max_length=10, choices=LISTING_TYPES)
+    listing_type = models.CharField(
+        max_length=20, choices=LISTING_TYPES, default="item"
+    )
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     image = models.ImageField(upload_to="market_images/", null=True, blank=True)
     created_at = models.DateTimeField(default=now)

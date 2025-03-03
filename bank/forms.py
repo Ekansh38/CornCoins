@@ -16,10 +16,14 @@ class MarketplaceListingForm(forms.ModelForm):
     class Meta:
         model = MarketplaceListing
         fields = ["title", "description", "image", "video", "price", "price_cc"]
+        widgets = {
+            "listing_type": forms.Select(choices=MarketplaceListing.LISTING_TYPES),
+        }
+
 
     def save(self, commit=True):
         listing = super().save(commit=False)
-        listing.is_active = True  # ✅ Ensure new listings are active
+        listing.is_active = True  
         if commit:
             listing.save()
         return listing

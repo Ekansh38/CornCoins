@@ -1,65 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
 
-<br>
-    <h2 class="text-center fw-bold">➕ Create a Marketplace Listing</h2>
 <div class="container mt-5">
+    <h2 class="text-center fw-bold">➕ Create a Marketplace Listing</h2>
 
     <div class="row justify-content-center">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-md-12 col-lg-12 col-sm-12">  <!-- Made it wider -->
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
+                    <form id="listing-form">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" id="title" class="form-control" required>
 
-                        <!-- Title -->
-                        <div class="mb-3">
-                            <label for="id_title" class="form-label fw-bold">Title</label>
-                            <input type="text" name="title" id="id_title" class="form-control" required>
-                        </div>
+                        <label for="description" class="form-label mt-2">Description</label>
+                        <textarea id="description" class="form-control" rows="3" required></textarea>
 
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="id_description" class="form-label fw-bold">Description</label>
-                            <textarea name="description" id="id_description" class="form-control" rows="4" required></textarea>
-                        </div>
+                        <label for="listing-type" class="form-label mt-2">Type</label>
+                        <select id="listing-type" class="form-control">
+                            <option value="item">Item</option>
+                            <option value="job">Job</option>
+                            <option value="service">Service</option>
+                        </select>
 
-                        <!-- Listing Type (Dropdown) -->
-                        <div class="mb-3">
-                            <label for="id_listing_type" class="form-label fw-bold">Listing Type</label>
-                            <select name="listing_type" id="id_listing_type" class="form-control">
-                                <option value="item">🎁 Item</option>
-                                <option value="service">🔧 Service</option>
-                                <option value="job">💼 Job Offer</option>
-                            </select>
-                        </div>
+                        <label for="price" class="form-label mt-2">Price (Credits)</label>
+                        <input type="number" id="price" class="form-control" step="0.01">
 
-                        <!-- Price -->
-                        <div class="mb-3">
-                            <label for="id_price" class="form-label fw-bold">💰 Price (Credits)</label>
-                            <input type="number" name="price" id="id_price" class="form-control" min="0">
-                        </div>
+                        <label for="price-cc" class="form-label mt-2">Price (Corn Coins)</label>
+                        <input type="number" id="price-cc" class="form-control">
 
-			<div class="mb-3">
-                            <label for="id_price_cc" class="form-label">🌽 Price in Corn Coins (Optional)</label>
-                            <input type="number" class="form-control" id="id_price_cc" name="price_cc" placeholder="Enter CC Price">
-                        </div>
+                        <label for="image" class="form-label mt-2">Image</label>
+                        <input type="file" id="image" class="form-control">
 
+                        <label for="video" class="form-label mt-2">Video (Optional)</label>
+                        <input type="file" id="video" class="form-control">
 
-                        <!-- Image Upload -->
-                        <div class="mb-3">
-                            <label for="id_image" class="form-label fw-bold">🖼️ Upload Image</label>
-                            <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
-                        </div>
+			<p id="upload-status" class="text-center text-warning mt-3" style="display: none;"></p>
 
-                        <!-- Video Upload -->
-                        <div class="mb-3">
-                            <label for="id_video" class="form-label fw-bold">📹 Upload Video (Optional)</label>
-                            <input type="file" name="video" id="id_video" class="form-control" accept="video/*">
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-success w-100">Submit Listing</button>
+                        <button type="button" class="btn btn-success w-100 mt-3" onclick="submitListing()">Submit Listing</button>
                     </form>
                 </div>
             </div>
@@ -67,18 +44,49 @@
     </div>
 </div>
 
-<style>
-    .container {
-        max-width: 800px;
-    }
+<script>
+function submitListing() {
+    let uploadStatus = document.getElementById("upload-status");
+    uploadStatus.innerHTML = "⏳ Uploading... Please wait.";
+    uploadStatus.style.display = "block";  // Show the message
 
-    .card {
-        border-radius: 10px;
-    }
+    let formData = new FormData();
+    formData.append("title", document.getElementById("title").value);
+    formData.append("description", document.getElementById("description").value);
+    formData.append("listing_type", document.getElementById("listing-type").value);
+    formData.append("price", document.getElementById("price").value);
+    formData.append("price_cc", document.getElementById("price-cc").value);
 
-    .form-label {
-        font-weight: 600;
-    }
-</style>
+    console.log(formData)
+    
+    let imageFile = document.getElementById("image").files[0];
+    if (imageFile) formData.append("image", imageFile);
+
+    let videoFile = document.getElementById("video").files[0];
+    if (videoFile) formData.append("video", videoFile);
+
+   
+
+    fetch("/marketplace/create/", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = "/marketplace/";
+        } else {
+            alert("❌ Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("❌ Submission Error:", error);
+        alert("❌ Failed to create listing.");
+    });
+}
+</script>
 
 {% endblock %}
