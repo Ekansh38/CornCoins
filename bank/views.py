@@ -1395,3 +1395,10 @@ def slot_machine_view(request):
             }, status=500)
 
     return render(request, "bank/slot_machine.html", {"balance": account})
+
+
+
+
+def news_detail(request, news_id):
+    article = get_object_or_404(NewsArticle, id=news_id)
+    return render(request, "bank/news_detail.html", {"article": article})

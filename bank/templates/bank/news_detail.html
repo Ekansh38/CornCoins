@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="news-detail-wrapper">
+        <!-- News Title & Date -->
+        <div class="text-center">
+            <h1 class="fw-bold news-title">{{ article.title }}</h1>
+            <p class="text-muted news-timestamp">{{ article.timestamp|date:"M d, Y H:i" }}</p>
+        </div>
+
+        <!-- News Image -->
+        {% if article.image %}
+        <div class="news-detail-image-container">
+            <img src="{{ article.image.url }}" class="news-detail-image" alt="News Image">
+        </div>
+        {% endif %}
+
+        <!-- News Content -->
+        <div class="news-detail-text">
+            <p class="fs-5">{{ article.description|linebreaks }}</p>
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'news' %}" class="btn btn-secondary shadow-sm px-4 py-2">
+                🔙 Back to News
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Improved CSS Styling -->
+<style>
+    .news-detail-wrapper {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .news-title {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .news-timestamp {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .news-detail-image-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .news-detail-image {
+        width: 100%;
+        max-height: 1000px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .news-detail-image:hover {
+        transform: scale(1.02);
+    }
+
+    .news-detail-text {
+        font-size: 1.2rem;
+        color: #444;
+        line-height: 1.8;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+{% endblock %}

@@ -22,6 +22,8 @@ urlpatterns = [
     path("order-book/", full_order_book, name="full_order_book"),
     path("transactions/", all_transactions, name="all_transactions"),
     path("news/", news_view, name="news"),
+    path("news/<int:news_id>/", news_detail, name="news_detail"),
+
     path("news/add/", add_news, name="add_news"),  # Page to upload articles
 
     path("dm/", dm_home, name="dm_home"),

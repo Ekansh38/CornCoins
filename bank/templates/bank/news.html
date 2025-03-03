@@ -5,33 +5,66 @@
         <h2 class="text-dark fw-bold">📰 Latest News</h2>
     </div>
 
-<div class="container mt-5">
-
-    <div class="row mt-4">
-        {% for article in articles %}
-        <div class="col-md-6">
-            <div class="card shadow-sm mb-4">
-                {% if article.image %}
-                <img src="{{ article.image.url }}" class="card-img-top img-fluid news-image" alt="News Image">
-                {% endif %}
-                <div class="card-body">
-                    <h4 class="card-title">{{ article.title }}</h4>
-                    <p class="text-muted">{{ article.timestamp|date:"M d, Y H:i" }}</p>
-                    <p class="card-text">{{ article.description|linebreaks }}</p>
-                </div>
+    <div class="container mt-5">
+        <div class="row mt-4">
+            {% for article in articles %}
+            <div class="col-md-6">
+                <!-- Clickable News Card -->
+                <a href="/news/{{ article.id }}" class="text-decoration-none text-dark">
+                    <div class="card news-card shadow-sm mb-4">
+                        {% if article.image %}
+                        <div class="news-image-container">
+                            <img src="{{ article.image.url }}" class="news-image" alt="News Image">
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h4 class="card-title">{{ article.title }}</h4>
+                            <p class="text-muted">{{ article.timestamp|date:"M d, Y H:i" }}</p>
+                            <p class="card-text">
+                                {{ article.description|truncatechars:300 }}
+                            </p>
+                        </div>
+                    </div>
+                </a>
             </div>
+            {% empty %}
+            <p class="text-center">No news articles available.</p>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p class="text-center">No news articles available.</p>
-        {% endfor %}
     </div>
 
-    <!-- ✅ Perfectly Centered Add News Button -->
-</div>
     <div class="d-flex justify-content-center mt-4">
         <a href="/news/add" class="btn btn-primary shadow-sm px-4 py-2">
              Add News
         </a>
     </div>
+
+    <!-- CSS Styles -->
+    <style>
+        .news-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: scale(1.05); /* Grows slightly on hover */
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15); /* Adds shadow for effect */
+        }
+
+        .news-image-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Prevents stretching */
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        .news-image {
+            max-width: 100%; /* Keeps original resolution */
+            max-height: 300px; /* Prevents too-large images */
+            object-fit: contain; /* Maintains aspect ratio */
+        }
+    </style>
 
 {% endblock %}
