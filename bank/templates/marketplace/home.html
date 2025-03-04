@@ -9,7 +9,44 @@
         <a href="{% url 'add_listing' %}" class="btn btn-success">➕ Create a Listing</a>
     </div>
 
+    <form method="GET" action="{% url 'marketplace_home' %}" class="card p-4 shadow-sm">
+        <div class="row">
+            <!-- 🔍 Search Bar -->
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control" placeholder="Search by title..." value="{{ request.GET.q }}">
+            </div>
 
+            <!-- 📌 Listing Type -->
+            <div class="col-md-3">
+                <select name="listing_type" class="form-control">
+                    <option value="">All Types</option>
+                    <option value="item" {% if request.GET.listing_type == "item" %}selected{% endif %}>🛍 Item</option>
+                    <option value="job" {% if request.GET.listing_type == "job" %}selected{% endif %}>💼 Job</option>
+                    <option value="service" {% if request.GET.listing_type == "service" %}selected{% endif %}>⚙️ Service</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <input type="number" name="min_price" class="form-control" placeholder="Min Credit Price" value="{{ request.GET.min_price }}">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="max_price" class="form-control" placeholder="Max Credit Price" value="{{ request.GET.max_price }}">
+            </div>
+
+            <!-- 🌽 Min & Max Corn Coin Price -->
+            <div class="col-md-3">
+                <input type="number" name="min_price_cc" class="form-control" placeholder="Min CC Price" value="{{ request.GET.min_price_cc }}">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="max_price_cc" class="form-control" placeholder="Max CC Price" value="{{ request.GET.max_price_cc }}">
+            </div>
+
+            <!-- 🔍 Search Button -->
+            <div class="col-md-3 text-center">
+                <button type="submit" class="btn btn-primary w-100">🔎 Search</button>
+            </div>
+        </div>
+    </form>
 
 
 <div class="container mt-5">
@@ -171,5 +208,12 @@ function closeListing(listingId) {
 }
 
 </style>
+
+
+<script>
+
+
+
+</script>
 
 {% endblock %}

@@ -1044,10 +1044,40 @@ def unread_messages(request):
 
 def marketplace_home(request):
     """
-    Displays all marketplace listings.
+    Displays marketplace listings with filtering options.
     """
     listings = MarketplaceListing.objects.filter(is_active=True).order_by("-created_at")
+
+
+    # 🔍 Get Filters from URL Parameters
+    query = request.GET.get("q", "").strip()
+    listing_type = request.GET.get("listing_type", "").strip()
+    min_price = request.GET.get("min_price", "")
+    max_price = request.GET.get("max_price", "")
+    min_price_cc = request.GET.get("min_price_cc", "")
+    max_price_cc = request.GET.get("max_price_cc", "")
+
+    # 🔎 Apply Text Search
+    if query:
+        listings = listings.filter(Q(title__icontains=query) | Q(description__icontains=query))
+
+    # 🛍 Filter by Listing Type
+    if listing_type:
+        listings = listings.filter(listing_type=listing_type)
+
+    if min_price:
+        listings = listings.filter(price__gte=min_price)
+    if max_price:
+        listings = listings.filter(price__lte=max_price)
+
+    # 🌽 Filter by Corn Coin Price
+    if min_price_cc:
+        listings = listings.filter(price_cc__gte=min_price_cc)
+    if max_price_cc:
+        listings = listings.filter(price_cc__lte=max_price_cc)
+
     return render(request, "marketplace/home.html", {"listings": listings})
+
 
 
 @csrf_exempt
