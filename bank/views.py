@@ -1450,3 +1450,95 @@ def news_detail(request, news_id):
 def arcade_warning(request):
     return render(request, "bank/arcade_warning.html")
 
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Poll, Choice, Vote
+from bank.models import Account
+
+def get_user_account(request):
+    """Fetch the currently logged-in user's account"""
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return None
+    return get_object_or_404(Account, id=account_id)
+
+def poll_list(request):
+    polls = Poll.objects.all().order_by("-created_at")
+    return render(request, "polls/poll_list.html", {"polls": polls})
+
+def poll_detail(request, poll_id):
+    poll = get_object_or_404(Poll, id=poll_id)
+    return render(request, "polls/poll_detail.html", {"poll": poll})
+
+def create_poll(request):
+    account = get_user_account(request)
+    if not account:
+        return redirect("/logout/")
+
+    if request.method == "POST":
+        question = request.POST.get("question")
+        choices = request.POST.getlist("choices")  # Get multiple choices
+        
+        if not question or len(choices) < 2:
+            messages.error(request, "A poll must have a question and at least two choices.")
+            return redirect("create_poll")
+
+        poll = Poll.objects.create(question=question, created_by=account)
+
+        for choice_text in choices:
+            if choice_text.strip():
+                Choice.objects.create(poll=poll, text=choice_text.strip())
+
+        messages.success(request, "Poll created successfully!")
+        return redirect("poll_list")
+
+    return render(request, "polls/create_poll.html")
+
+def vote_poll(request, poll_id):
+    account = get_user_account(request)
+    if not account:
+        return redirect("/logout/")
+
+    poll = get_object_or_404(Poll, id=poll_id)
+    choice_id = request.POST.get("choice")
+
+    if Vote.objects.filter(poll=poll, user=account).exists():
+        messages.error(request, "You have already voted on this poll.")
+        return redirect("poll_detail", poll_id=poll.id)
+
+    choice = get_object_or_404(Choice, id=choice_id, poll=poll)
+    choice.votes += 1
+    choice.save()
+
+    Vote.objects.create(poll=poll, user=account, choice=choice)
+
+    messages.success(request, "Your vote has been recorded!")
+    return redirect("poll_detail", poll_id=poll.id)
+
+
+
+
+def get_user_account(request):
+    """Fetch the currently logged-in user's account"""
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return None
+    return get_object_or_404(Account, id=account_id)
+
+def delete_poll(request, poll_id):
+    account = get_user_account(request)
+    if not account:
+        return redirect("/logout/")
+
+    poll = get_object_or_404(Poll, id=poll_id)
+
+    if poll.created_by != account:
+        messages.error(request, "You are not allowed to delete this poll.")
+        return redirect("poll_list")
+
+    poll.delete()
+    messages.success(request, "Poll deleted successfully!")
+    return redirect("poll_list")

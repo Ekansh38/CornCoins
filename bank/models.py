@@ -196,3 +196,31 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.name} on {self.article.title}"
+
+
+
+
+
+class Poll(models.Model):
+    question = models.CharField(max_length=255)
+    created_by = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.question
+
+class Choice(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name="choices")
+    text = models.CharField(max_length=255)
+    votes = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.text
+
+class Vote(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name="votes")
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("poll", "user")

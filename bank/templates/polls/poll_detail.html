@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 col-md-8 col-sm-12 col-lg-6">
+        <h2 class="text-center">{{ poll.question }}</h2>
+        <p class="text-muted text-center">Created by {{ poll.created_by.name }} | {{ poll.created_at|date:"M d, Y" }}</p>
+
+        <form method="POST" action="{% url 'vote_poll' poll.id %}" class="mt-3">
+            {% csrf_token %}
+            <div class="list-group">
+                {% for choice in poll.choices.all %}
+                    <label class="list-group-item d-flex justify-content-between align-items-center">
+                        <input class="form-check-input me-2" type="radio" name="choice" value="{{ choice.id }}" required>
+                        {{ choice.text }}
+                        <span class="badge bg-primary">{{ choice.votes }} votes</span>
+                    </label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-success mt-3 w-100">✅ Vote</button>
+        </form>
+
+        <h3 class="mt-4 text-center">Results</h3>
+        {% for choice in poll.choices.all %}
+            <div class="mb-2">
+                <span class="fw-bold">{{ choice.text }}</span>
+                <div class="progress">
+                    <div class="progress-bar" 
+                         role="progressbar" 
+                         style="width: {% widthratio choice.votes poll.votes.count 100 %}%; background-color: hsl({{ forloop.counter|add:10 }}0, 80%, 50%)"
+                         aria-valuenow="{{ choice.votes }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="{{ poll.votes.count }}">
+                        {{ choice.votes }} votes
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+	<br>
+                        {% if poll.created_by.id == request.session.account_id %}
+                    <form method="POST" action="{% url 'delete_poll' poll.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">❌ Delete</button>
+                    </form>
+                    {% endif %}
+    </div>
+
+
+</div>
+
+<style>
+    .progress {
+        height: 25px;
+        border-radius: 10px;
+    }
+    .progress-bar {
+        font-weight: bold;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}

@@ -54,6 +54,11 @@ urlpatterns = [
     path("arcade/", arcade, name="arcade"),
     path("arcade/warning/", arcade_warning, name="arcade_warning"),
 
+    path("polls/", poll_list, name="poll_list"),
+    path("polls/<int:poll_id>/", poll_detail, name="poll_detail"),
+    path("polls/create/", create_poll, name="create_poll"),
+    path("polls/<int:poll_id>/vote/", vote_poll, name="vote_poll"),
+    path("polls/<int:poll_id>/delete/", delete_poll, name="delete_poll"),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

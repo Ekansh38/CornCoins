@@ -2,6 +2,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Corn Coin Exchange{% endblock %}</title>
@@ -31,6 +33,7 @@
         <li class="nav-item"><a class="nav-link" href="/momos-menu/">Momo's Menu</a></li>
         <li class="nav-item"><a class="nav-link" href="/accounts/">Accounts</a></li>
         <li class="nav-item"><a class="nav-link" href="/arcade/warning">Arcade</a></li>
+        <li class="nav-item"><a class="nav-link" href="/polls">Polls</a></li>
 
         <!-- Dropdown for Small Screens -->
         <li class="nav-item dropdown d-lg-none">
@@ -46,7 +49,8 @@
             <li><a class="dropdown-item" href="/marketplace/">🛒 CTP Marketplace</a></li>
             <li><a class="dropdown-item" href="/momos-menu/">📃 Momo's Menu</a></li>
             <li><a class="dropdown-item" href="/accounts/">📒 Accounts</a></li>
-            <li><a class="dropdown-item" href="/slot-machine/">🎰 Slot Machine</a></li>
+            <li><a class="dropdown-item" href="/arcade/warning">Arcade</a></li>
+            <li><a class="dropdown-item" href="/polls">🗳️ Polls</a></li>
           </ul>
         </li>
       </ul>
