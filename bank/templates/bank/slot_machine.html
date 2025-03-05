@@ -3,7 +3,7 @@
 
 <br><br>
 <div class="balance-wrapper">
-    <h1 class="slot-title">🎰 Slot Machine 🎰</h1>
+	<h1 class="slot-title">Arcade</h1>
     <br>
     <div class="balance-container">
         <p>Your Credits: <span id="credits">{{ balance.balance_credits }}</span></p>
@@ -153,7 +153,7 @@ document.getElementById("slot-form").addEventListener("submit", function(event) 
     }, 100); // Change symbols every 100ms for a smooth spin effect
 
     // Send the bet to the server (NO reels included)
-    fetch("{% url 'slot_machine' %}", {
+    fetch("{% url 'arcade' %}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

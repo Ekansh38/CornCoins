@@ -1088,7 +1088,6 @@ def create_listing(request):
     user = get_object_or_404(Account, id=request.session["account_id"])
     if request.method == "POST":
 
-
         title = request.POST.get("title")
         description = request.POST.get("description")
         listing_type = request.POST.get("listing_type")
@@ -1297,7 +1296,7 @@ def edit_listing(request, listing_id):
 import random
 from decimal import Decimal, ROUND_DOWN
 
-def slot_machine_view(request):
+def arcade(request):
     account_id = request.session.get("account_id")
 
     if not account_id:
@@ -1309,9 +1308,8 @@ def slot_machine_view(request):
         del request.session["account_id"]
         return redirect("/logout/")
 
-    # Get Slot Machine Treasury
     try:
-        treasury = Account.objects.get(name="Corntopia Slot Machine")
+        treasury = Account.objects.get(name="Corntopia Arcade")
     except Account.DoesNotExist:
         return JsonResponse({"message": "CT Slot Machine account not found!"}, status=500)
 
@@ -1445,3 +1443,10 @@ def news_detail(request, news_id):
             return redirect("news_detail", news_id=news_id)
 
     return render(request, "bank/news_detail.html", {"article": article, "comments": comments})
+
+
+
+
+def arcade_warning(request):
+    return render(request, "bank/arcade_warning.html")
+

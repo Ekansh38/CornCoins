@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+<br>
+    <h1 class="text-center fw-bold">ARCADE TERMS & CONDITIONS</h1>
+<br>
+    <p class="text-center text-muted">Last Updated: March 3, 2025</p>
+
+<div class="container mt-5">
+    <div class="warning-box p-4 mt-4">
+        <h2>1. Acknowledgment of Risk</h2>
+        <p>
+            By accessing the Arcade, you acknowledge that participation in any games or activities within this platform involves significant financial risk. 
+            The probability of losing money is higher than the probability of winning. The Arcade is not an investment opportunity, nor is it a financial service. 
+            It is purely an entertainment-based feature within Corntopia. 
+            You accept full responsibility for any and all losses incurred during your participation.
+        </p>
+
+        <h2>2. Win/Loss Probability</h2>
+        <p>
+            The statistical probability of winning in the Arcade is approximately one in three. This means that for every three spins or rounds played, the system is designed to result in a net loss for two of them. 
+            It is not possible to alter or manipulate the odds in any way. 
+            Continued participation over time will, on average, result in financial loss.
+        </p>
+
+        <h2>3. Finality of Transactions</h2>
+        <p>
+            All wagers, bets, and financial transactions within the Arcade are final. 
+            No refunds, reversals, or chargebacks will be issued under any circumstances. 
+            If you lose a wager, you agree that it was a voluntary decision and that you forfeit the wagered amount permanently. 
+            Attempts to request reimbursement for losses will be ignored.
+        </p>
+
+        <h2>4. Psychological Considerations</h2>
+        <p>
+            The Arcade uses a randomized probability system that may result in multiple consecutive losses or occasional wins. 
+            This system may create an illusion that winning is due after a series of losses. 
+            This is known as the "Gambler's Fallacy" and has no basis in statistical reality. 
+            No amount of previous losses or wins affects future outcomes. 
+            Any perception of "luck" or "hot streaks" is purely coincidental.
+        </p>
+
+        <h2>5. Financial Responsibility</h2>
+        <p>
+            You should only participate in the Arcade if you are prepared to lose the amount you wager. 
+            Corntopia and its affiliates bear no liability for financial distress, addiction, or excessive losses caused by your participation. 
+            If you are not financially secure, or if you have concerns about potential addiction to gambling-like activities, you should exit this platform immediately.
+        </p>
+
+        <h2>6. Prohibited Claims & Disputes</h2>
+        <p>
+            By proceeding, you agree to waive all rights to dispute or challenge the outcome of any game, wager, or transaction within the Arcade. 
+            The system operates using a predetermined algorithm that does not guarantee profit or fairness beyond its programmed probabilities. 
+            Any claims suggesting the Arcade is unfair, fraudulent, or malfunctioning will not be entertained.
+        </p>
+
+        <h2>7. No Financial Advice</h2>
+        <p>
+            Participation in the Arcade should not be considered an alternative to any investment, income-generating opportunity, or financial security system. 
+            Corntopia does not provide financial, investment, or gambling advice, and participation in this system should not be treated as an attempt to generate revenue.
+        </p>
+
+        <h2>8. Agreement to Proceed</h2>
+        <p>
+            By clicking "Next," you acknowledge that:
+        </p>
+        <ul>
+            <li>You accept the risks associated with playing in the Arcade.</li>
+            <li>You understand that the odds are against you.</li>
+            <li>You accept that all transactions are final and non-refundable.</li>
+            <li>You release Corntopia and its affiliates from any liability for losses incurred.</li>
+            <li>You waive the right to claim damages, disputes, or financial compensation.</li>
+            <li>Your participation is voluntary and not influenced by any misleading promises.</li>
+        </ul>
+        <p>
+            If you do not agree with these terms, you must exit immediately. 
+            Continuing beyond this page indicates full acceptance of all conditions outlined above.
+        </p>
+    </div>
+
+</div>
+    <div class="text-center mt-4">
+        <a href="{% url 'arcade' %}" class="btn btn-secondary btn-lg">NEXT</a>
+    </div>
+
+<!-- ✅ Legal Style Formatting -->
+<style>
+    .warning-box {
+        max-width: 900px;
+        margin: auto;
+        background: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 30px;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+        text-align: left;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+
+    .btn-secondary {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+    }
+</style>
+
+{% endblock %}

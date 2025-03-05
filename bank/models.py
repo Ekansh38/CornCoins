@@ -19,7 +19,7 @@ def default_profile_pic():
 
 class Account(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=255)  # Increased length for hashed password
+    password = models.CharField(max_length=255)  
     balance_credits = models.FloatField(default=0.0)
     corn_coins = models.FloatField(default=0.0)
     is_business = models.BooleanField(default=False)  
@@ -143,6 +143,7 @@ class MarketplaceListing(models.Model):
         ("item", "Item"),
         ("job", "Job"),
         ("service", "Service"),
+        ("food", "Food"),
     ]
 
     seller = models.ForeignKey("Account", on_delete=models.CASCADE)
