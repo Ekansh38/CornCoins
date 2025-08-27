@@ -1,7 +1,8 @@
 # 🌽 Corntopia  
 
-Corntopia was a digital "country" me and my friends started in school that slowly grew into a full-on economic simulation. What began as a messy paper-based system to track fake money and trades evolved into a complete online banking, cryptocurrency, and marketplace platform — powered by **CornCoins**.  
+Corntopia was a digital "country" me and my friends started in school that slowly grew into giant ecosystem. What began as a messy paper-based system to track fake money and trades evolved into a complete online banking, cryptocurrency, and marketplace platform.
 
+**Sadly all images are gone from the data**
 ---
 
 ## Background  
@@ -10,7 +11,7 @@ Before the website, around 8 citizens tracked their finances on paper. The value
 
 To fix this, I built a website to:  
 - Manage everyone’s finances.  
-- Simulate a real cryptocurrency system.  
+- Simulate a real cryptocurrency system.
 - Enable an internal marketplace for trading goods and services.  
 - Create a self-sustaining economy among students.  
 
@@ -25,8 +26,9 @@ Over time, Corntopia grew to **50+ active citizens** in our school.
 - Transfer funds between accounts.  
 
 ### Cryptocurrency Exchange  
-- **Dynamic Pricing**: Price determined by the average of the last 3 transactions (later refined).  
-- **Mining System**: Earn CornCoins in exchange for your time.  
+- **Dynamic Pricing**: Price determined by the average of the last 3 transactions (later refined).
+- **Crypto Exchange**: People could place buy and sell orders with a order matching algorithm to fulfill orders.  
+- **Mining System**: Earn CornCoins in exchange for your time using a 3 digit code system.  
 - Implemented ideas from real cryptocurrencies to simulate value creation.  
 
 ### Corntopia People’s Marketplace
@@ -35,16 +37,16 @@ Over time, Corntopia grew to **50+ active citizens** in our school.
   - List items like toys, books, or services (e.g. homework help).  
   - Negotiate deals with buyers/sellers.  
   - Complete transactions using Credits or CornCoins.  
-- Inspired by **eBay/Carousell**, with real-life delivery after digital payment.  
-- Promoted sustainability by giving old toys and items a second life.  
+- Inspired by **eBay/Carousell**
+- Promoted sustainability by giving old toys and items a second life.
 
 ### Chat System
 - A messaging feature similar to WhatsApp or Google Chat.  
 - Allowed citizens to negotiate deals, chat, and coordinate trades.  
 
 ### Fun Extras
-- **Arcade** (a.k.a. a rebranded casino).  
-- Planned horse racing simulation for betting with CornCoins.  
+- **Arcade** (a.k.a. a rebranded casino).
+- **News** a place where jounralists could post updates about things happening in the country.
 - Regular updates that kept the community engaged.  
 
 ---
@@ -73,7 +75,7 @@ Luckily, months later, I managed to recover most of the data (except for images,
 Although Corntopia was short-lived, it was one of my first large-scale projects:  
 - Taught me about **cryptocurrency mechanics**, **economics**, and **community-driven systems**.  
 - Helped me practice **Django development**, **databases**, **marketplace logic**, and **chat applications**.  
-- Showed how quickly small ideas can scale into a thriving ecosystem when people are engaged.  
+- Showed how quickly small ideas can scale into a thriving ecosystem when people are engaged.
 
 ---
 
@@ -82,16 +84,8 @@ Although Corntopia was short-lived, it was one of my first large-scale projects:
 - **Database:** SQLite  
 - **Frontend:** HTML, CSS, JavaScript  
 
----
-
-## Final Thoughts  
-
-Corntopia started as a joke between friends but became a surprisingly complex experiment in economics, technology, and community building.  
-
-It was messy, chaotic, and eventually shut down — but it remains one of my most memorable projects.  
-
----
 
 ## Credits  
 
-Partially written by ChatGPT. Prompt in `prompt.txt`.  
+README.md partially written by ChatGPT. Prompt in `prompt.txt`.
+
