@@ -23,13 +23,16 @@ Over time, Corntopia grew to **50+ active citizens** in our school.
 
 ### Banking System  
 - Citizens could hold balances in **Credits** (our “US dollar”) and **CornCoins** (cryptocurrency).  
-- Transfer funds between accounts.  
+- Transfer funds between accounts. 
 
 ### Cryptocurrency Exchange  
 - **Dynamic Pricing**: Price determined by the average of the last 3 transactions (later refined).
 - **Crypto Exchange**: People could place buy and sell orders with a order matching algorithm to fulfill orders.  
 - **Mining System**: Earn CornCoins in exchange for your time using a 3 digit code system.  
-- Implemented ideas from real cryptocurrencies to simulate value creation.  
+- Implemented ideas from real cryptocurrencies to simulate value creation.
+
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 13 16 PM" src="https://github.com/user-attachments/assets/a2c6e6ea-2114-45c9-a12d-b84252d4f129" />
+
 
 ### Corntopia People’s Marketplace
 - A hub for buying and selling goods and services.  
@@ -40,16 +43,26 @@ Over time, Corntopia grew to **50+ active citizens** in our school.
 - Inspired by **eBay/Carousell**
 - Promoted sustainability by giving old toys and items a second life.
 
+
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 13 31 PM" src="https://github.com/user-attachments/assets/ec62b785-0ce9-4af3-8482-1ed100cbda6b" />
+
+
 ### Chat System
 - A messaging feature similar to WhatsApp or Google Chat.  
-- Allowed citizens to negotiate deals, chat, and coordinate trades.  
+- Allowed citizens to negotiate deals, chat, and coordinate trades.
+
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 14 13 PM" src="https://github.com/user-attachments/assets/a41b4f1c-78d0-452f-b697-928234546aaf" />
+
 
 ### Fun Extras
 - **Arcade** (a.k.a. a rebranded casino).
 - **News** a place where jounralists could post updates about things happening in the country.
 - Regular updates that kept the community engaged.  
 
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 13 25 PM" src="https://github.com/user-attachments/assets/5ef1b885-100f-4a7f-be11-311544ba941c" />
+
 ---
+
 
 ## Growth  
 
@@ -88,4 +101,12 @@ Although Corntopia was short-lived, it was one of my first large-scale projects:
 ## Credits  
 
 README.md partially written by ChatGPT. Prompt in `prompt.txt`.
+
+
+## Extra Images and Showcases
+
+
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 29 04 PM" src="https://github.com/user-attachments/assets/df72b5dd-a2a2-4fbe-b063-acfc13a52b2a" />
+
+
 
