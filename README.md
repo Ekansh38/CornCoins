@@ -105,6 +105,7 @@ README.md partially written by ChatGPT. Prompt in `prompt.txt`.
 
 ## Extra Images and Showcases
 
+<img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 14 20 PM" src="https://github.com/user-attachments/assets/ff527492-d8f3-4f80-8ccd-5ed4d557f8ba" />
 
 <img width="1440" height="900" alt="Screenshot 2025-08-27 at 6 29 04 PM" src="https://github.com/user-attachments/assets/df72b5dd-a2a2-4fbe-b063-acfc13a52b2a" />
 
